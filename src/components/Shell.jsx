@@ -29,6 +29,7 @@ const MAX_RECENT_TABS = 12;
 const TAB_LABEL_KEYS = {
   "/admin/users": "users",
   "/admin/withdrawals": "withdrawals",
+  "/admin/kyc": "kyc",
   "/admin/orders/list": "orderList",
   "/admin/trial-bonus": "trialBonus",
   "/admin/bonus-credit": "bonusCredit",
