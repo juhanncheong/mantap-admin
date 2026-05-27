@@ -26,7 +26,6 @@ const RECENT_TABS_STORAGE_KEY = "taichang_admin_recent_tabs_v1";
 const MAX_RECENT_TABS = 12;
 
 const TAB_LABEL_KEYS = {
-  "/admin/dashboard": "dashboard",
   "/admin/users": "users",
   "/admin/withdrawals": "withdrawals",
   "/admin/deposits": "deposits",
@@ -45,7 +44,11 @@ const TAB_LABEL_KEYS = {
 };
 
 function isTrackableAdminPath(pathname) {
-  return pathname.startsWith("/admin/") && pathname !== "/admin/login";
+  return (
+    pathname.startsWith("/admin/") &&
+    pathname !== "/admin/login" &&
+    pathname !== "/admin/dashboard"
+  );
 }
 
 function getTabKey(pathname) {
@@ -356,7 +359,7 @@ export default function Shell({ title, children }) {
             : null;
 
         const fallbackPath =
-          leftTab?.path || rightTab?.path || "/admin/dashboard";
+          leftTab?.path || rightTab?.path || "/admin/users";
 
         navigate(fallbackPath);
       }
@@ -467,15 +470,6 @@ export default function Shell({ title, children }) {
 
           <div className="flex-1">
             <nav className="mt-10 space-y-2">
-              <SideLink
-                theme={theme}
-                to="/admin/dashboard"
-                icon={<Users className="h-4 w-4 shrink-0" />}
-                onNavigate={() => setMobileMenuOpen(false)}
-              >
-                {t("nav.dashboard")}
-              </SideLink>
-
               <SideLink
                 theme={theme}
                 to="/admin/users"

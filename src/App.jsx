@@ -3,7 +3,6 @@ import { ToastContainer } from "react-toastify";
 import { ThemeProvider } from "./context/ThemeContext";
 import "react-toastify/dist/ReactToastify.css";
 import InvitationCodes from "./pages/InvitationCodes";
-import Dashboard from "./pages/Dashboard";
 import AdminLogin from "./pages/AdminLogin";
 import UsersPage from "./pages/Users";
 import OrdersPoolPage from "./pages/OrdersPool";
@@ -30,7 +29,7 @@ export default function App() {
             <Route path="/" element={<Navigate to="/admin/login" replace />} />
       
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/dashboard" element={<Navigate to="/admin/users" replace />} />
             <Route path="/admin/invitation-codes" element={<InvitationCodes />} />
             <Route path="/admin/users" element={<UsersPage />} />
             <Route path="/admin/trial-bonus" element={<TrialBonus />} />
