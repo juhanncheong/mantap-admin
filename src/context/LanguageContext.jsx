@@ -11,6 +11,7 @@ const translations = {
     nav: {
       dashboard: "Dashboard",
       users: "Users",
+      kyc: "KYC",
       withdrawals: "Withdrawals",
       deposits: "Deposits",
       orderList: "Order List",
@@ -1355,6 +1356,7 @@ const translations = {
     nav: {
       dashboard: "仪表盘",
       users: "用户管理",
+      kyc: "身份认证",
       withdrawals: "提现管理",
       deposits: "充值管理",
       orderList: "订单列表",
