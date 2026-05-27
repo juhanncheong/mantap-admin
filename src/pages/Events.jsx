@@ -352,36 +352,30 @@ export default function Events() {
   async function submitCreate() {
     const name = safeStr(createModal.name);
     const description = safeStr(createModal.description);
-    const imageUrl = safeStr(createModal.imageUrl);
     const imageFile = createModal.imageFile;
-
-    if (!name || !description || (!imageFile && !imageUrl)) {
+  
+    if (!name || !description || !imageFile) {
       toast.error(t("events.fillRequired"));
       return;
     }
-
+  
     setBusyId("create");
-
+  
     try {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("description", description);
-
-      if (imageFile) {
-        formData.append("image", imageFile);
-      } else if (imageUrl) {
-        formData.append("imageUrl", imageUrl);
-      }
-
+      formData.append("image", imageFile);
+  
       const data = await fetchForm(`${API_BASE}/api/admin/events`, {
         method: "POST",
         body: formData,
       });
-
+  
       const newEvent = data.event;
       setRows((prev) => [newEvent, ...prev]);
       toast.success(t("events.eventCreated"));
-
+  
       closeCreateModal();
     } catch (e) {
       toast.error(e.message || t("events.failedCreateEvent"));
@@ -392,30 +386,27 @@ export default function Events() {
 
   async function submitEdit() {
     if (!editModal.id) return;
-
+  
     const name = safeStr(editModal.name);
     const description = safeStr(editModal.description);
-    const imageUrl = safeStr(editModal.imageUrl);
     const imageFile = editModal.imageFile;
-
-    if (!name || !description || (!imageFile && !imageUrl)) {
+  
+    if (!name || !description) {
       toast.error(t("events.fillRequired"));
       return;
     }
-
+  
     setBusyId(editModal.id);
-
+  
     try {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("description", description);
-
+  
       if (imageFile) {
         formData.append("image", imageFile);
-      } else if (imageUrl) {
-        formData.append("imageUrl", imageUrl);
       }
-
+  
       const data = await fetchForm(
         `${API_BASE}/api/admin/events/${editModal.id}`,
         {
@@ -423,18 +414,13 @@ export default function Events() {
           body: formData,
         }
       );
-
-      const updated = data.event || {
-        _id: editModal.id,
-        name,
-        description,
-        imageUrl,
-      };
-
+  
+      const updated = data.event;
+  
       setRows((prev) =>
         prev.map((x) => (x._id === editModal.id ? { ...x, ...updated } : x))
       );
-
+  
       toast.success(t("events.eventUpdated"));
       closeEditModal();
     } catch (e) {
@@ -806,20 +792,7 @@ function EventForm({
         </div>
       </div>
 
-      <div className={subCardClass}>
-        <div className={`text-xs font-semibold ${strongText}`}>
-          {mode === "edit" ? t("events.imageUrl") : t("events.imageUrlOptional")}
-        </div>
-
-        <input
-          value={modal.imageUrl}
-          onChange={(e) => setModal((p) => ({ ...p, imageUrl: e.target.value }))}
-          placeholder="https://....jpg"
-          className={`mt-2 ${inputClass}`}
-        />
-      </div>
-
-      {modal.imageFile || safeStr(modal.imageUrl) ? (
+      {modal.imageFile || (mode === "edit" && safeStr(modal.imageUrl)) ? (
         <div className={subCardClass}>
           <div className={`text-xs font-semibold ${strongText}`}>
             {t("events.preview")}
