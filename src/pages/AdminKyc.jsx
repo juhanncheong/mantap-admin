@@ -8,7 +8,6 @@ import {
   Eye,
   RefreshCw,
   Search,
-  ShieldCheck,
   XCircle,
 } from "lucide-react";
 
@@ -29,22 +28,30 @@ function formatDate(value) {
   return d.toLocaleString();
 }
 
-function formatDocumentType(type) {
-  const map = {
-    NATIONAL_ID: "National ID",
-    PASSPORT: "Passport",
-    DRIVERS_LICENSE: "Driver's License",
-  };
-
-  return map[type] || type || "-";
-}
-
 function getUserLabel(user) {
   if (!user) return "-";
   return user.uid || user.phoneNumber || user._id || "-";
 }
 
-function StatusPill({ status }) {
+function statusText(status, t) {
+  const clean = String(status || "PENDING").toUpperCase();
+
+  if (clean === "APPROVED") return t("adminKyc.approved");
+  if (clean === "REJECTED") return t("adminKyc.rejected");
+  return t("adminKyc.pending");
+}
+
+function formatDocumentType(type, t) {
+  const clean = String(type || "").toUpperCase();
+
+  if (clean === "NATIONAL_ID") return t("adminKyc.nationalId");
+  if (clean === "PASSPORT") return t("adminKyc.passport");
+  if (clean === "DRIVERS_LICENSE") return t("adminKyc.driversLicense");
+
+  return type || "-";
+}
+
+function StatusPill({ status, t }) {
   const clean = String(status || "PENDING").toUpperCase();
 
   const base =
@@ -52,8 +59,10 @@ function StatusPill({ status }) {
 
   if (clean === "APPROVED") {
     return (
-      <span className={`${base} border-emerald-500/25 bg-emerald-500/10 text-emerald-600`}>
-        APPROVED
+      <span
+        className={`${base} border-emerald-500/25 bg-emerald-500/10 text-emerald-600`}
+      >
+        {t("adminKyc.approved")}
       </span>
     );
   }
@@ -61,19 +70,19 @@ function StatusPill({ status }) {
   if (clean === "REJECTED") {
     return (
       <span className={`${base} border-red-500/25 bg-red-500/10 text-red-600`}>
-        REJECTED
+        {t("adminKyc.rejected")}
       </span>
     );
   }
 
   return (
     <span className={`${base} border-amber-500/25 bg-amber-500/10 text-amber-600`}>
-      PENDING
+      {t("adminKyc.pending")}
     </span>
   );
 }
 
-function Drawer({ open, title, subtitle, children, onClose }) {
+function Drawer({ open, title, subtitle, children, onClose, closeLabel }) {
   const panelRef = useRef(null);
   const { theme } = useTheme();
 
@@ -154,6 +163,7 @@ function Drawer({ open, title, subtitle, children, onClose }) {
             <button
               type="button"
               onClick={onClose}
+              aria-label={closeLabel}
               className={`shrink-0 rounded-xl px-3 py-2 text-xs transition ${
                 theme === "dark"
                   ? "border border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
@@ -212,7 +222,7 @@ export default function AdminKyc() {
     : "mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm";
 
   const tableHeaderBarClass = isDark
-    ? "bg-white/5 px-4 py-3 text-sm font-semibold"
+    ? "bg-white/5 px-4 py-3 text-sm font-semibold text-white"
     : "bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-900";
 
   const tableHeadClass = isDark
@@ -256,7 +266,7 @@ export default function AdminKyc() {
     const auth = getAuthHeaders();
 
     if (!auth) {
-      throw new Error("Please login again.");
+      throw new Error(t("adminKyc.pleaseLoginAgain"));
     }
 
     const res = await fetch(url, {
@@ -270,7 +280,9 @@ export default function AdminKyc() {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data?.ok === false) {
-      throw new Error(data?.message || `Request failed (${res.status})`);
+      throw new Error(
+        data?.message || `${t("adminKyc.requestFailed")} (${res.status})`
+      );
     }
 
     return data;
@@ -283,7 +295,7 @@ export default function AdminKyc() {
       const data = await fetchJSON(`${API_BASE}/api/admin/kyc`);
       setItems(Array.isArray(data.items) ? data.items : []);
     } catch (err) {
-      toast.error(err.message || "Failed to load KYC submissions");
+      toast.error(err.message || t("adminKyc.failedLoad"));
       setItems([]);
     } finally {
       setLoading(false);
@@ -293,7 +305,7 @@ export default function AdminKyc() {
   async function approveKyc(kyc) {
     if (!kyc?._id) return;
 
-    const ok = window.confirm("Approve this KYC verification?");
+    const ok = window.confirm(t("adminKyc.confirmApprove"));
     if (!ok) return;
 
     setBusyId(kyc._id);
@@ -317,9 +329,9 @@ export default function AdminKyc() {
         prev && prev._id === kyc._id ? { ...prev, ...updated } : prev
       );
 
-      toast.success(data.message || "KYC approved");
+      toast.success(data.message || t("adminKyc.approvedToast"));
     } catch (err) {
-      toast.error(err.message || "Failed to approve KYC");
+      toast.error(err.message || t("adminKyc.failedApprove"));
     } finally {
       setBusyId(null);
     }
@@ -331,11 +343,11 @@ export default function AdminKyc() {
     const reason = String(rejectReason || "").trim();
 
     if (!reason) {
-      toast.error("Please enter rejection reason");
+      toast.error(t("adminKyc.enterRejectReason"));
       return;
     }
 
-    const ok = window.confirm("Reject this KYC verification?");
+    const ok = window.confirm(t("adminKyc.confirmReject"));
     if (!ok) return;
 
     setBusyId(kyc._id);
@@ -364,9 +376,9 @@ export default function AdminKyc() {
         prev && prev._id === kyc._id ? { ...prev, ...updated } : prev
       );
 
-      toast.success(data.message || "KYC rejected");
+      toast.success(data.message || t("adminKyc.rejectedToast"));
     } catch (err) {
-      toast.error(err.message || "Failed to reject KYC");
+      toast.error(err.message || t("adminKyc.failedReject"));
     } finally {
       setBusyId(null);
     }
@@ -374,6 +386,7 @@ export default function AdminKyc() {
 
   useEffect(() => {
     loadKyc();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(() => {
@@ -408,19 +421,19 @@ export default function AdminKyc() {
   const selectedUser = selected?.user || {};
 
   return (
-    <Shell title="KYC Verification">
+    <Shell title={t("adminKyc.title")}>
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className={`text-xs ${mutedText}`}>
-          Review identity verification submissions and approve or reject users.
-        </div>
+        <div className={`text-xs ${mutedText}`}>{t("adminKyc.subtitle")}</div>
 
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
           <div className="relative md:w-72">
-            <Search className={`pointer-events-none absolute left-3 top-2.5 h-4 w-4 ${mutedText}`} />
+            <Search
+              className={`pointer-events-none absolute left-3 top-2.5 h-4 w-4 ${mutedText}`}
+            />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search name, UID, phone, document..."
+              placeholder={t("adminKyc.searchPlaceholder")}
               className={`${inputClass} pl-9`}
             />
           </div>
@@ -430,20 +443,16 @@ export default function AdminKyc() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className={inputClass}
           >
-            <option value="all">All Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
+            <option value="all">{t("adminKyc.allStatus")}</option>
+            <option value="PENDING">{t("adminKyc.pending")}</option>
+            <option value="APPROVED">{t("adminKyc.approved")}</option>
+            <option value="REJECTED">{t("adminKyc.rejected")}</option>
           </select>
 
-          <button
-            disabled={loading}
-            onClick={loadKyc}
-            className={buttonClass}
-          >
+          <button disabled={loading} onClick={loadKyc} className={buttonClass}>
             <span className="inline-flex items-center gap-2">
               <RefreshCw className={classNames("h-4 w-4", loading && "animate-spin")} />
-              Refresh
+              {t("adminKyc.refresh")}
             </span>
           </button>
         </div>
@@ -451,21 +460,21 @@ export default function AdminKyc() {
 
       <div className={tableWrapClass}>
         <div className={tableHeaderBarClass}>
-          KYC Submissions ({filtered.length})
+          {t("adminKyc.submissions")} ({filtered.length})
         </div>
 
         <div className="w-full overflow-x-auto">
           <table className="w-full min-w-[1100px] text-left text-sm">
             <thead className={tableHeadClass}>
               <tr>
-                <th className="px-4 py-3">Action</th>
-                <th className="px-4 py-3">User</th>
-                <th className="px-4 py-3">Phone</th>
-                <th className="px-4 py-3">Full Name</th>
-                <th className="px-4 py-3">Document</th>
-                <th className="px-4 py-3">Document Number</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Submitted</th>
+                <th className="px-4 py-3">{t("adminKyc.action")}</th>
+                <th className="px-4 py-3">{t("adminKyc.user")}</th>
+                <th className="px-4 py-3">{t("adminKyc.phone")}</th>
+                <th className="px-4 py-3">{t("adminKyc.fullName")}</th>
+                <th className="px-4 py-3">{t("adminKyc.document")}</th>
+                <th className="px-4 py-3">{t("adminKyc.documentNumber")}</th>
+                <th className="px-4 py-3">{t("adminKyc.status")}</th>
+                <th className="px-4 py-3">{t("adminKyc.submitted")}</th>
               </tr>
             </thead>
 
@@ -495,7 +504,7 @@ export default function AdminKyc() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td className={`px-4 py-5 ${softText}`} colSpan={8}>
-                    No KYC submissions found.
+                    {t("adminKyc.noSubmissions")}
                   </td>
                 </tr>
               ) : (
@@ -517,7 +526,7 @@ export default function AdminKyc() {
                         >
                           <span className="inline-flex items-center gap-2">
                             <Eye className="h-4 w-4" />
-                            View
+                            {t("adminKyc.view")}
                           </span>
                         </button>
                       </td>
@@ -537,7 +546,7 @@ export default function AdminKyc() {
                       </td>
 
                       <td className={`px-4 py-3 text-xs ${softText}`}>
-                        {formatDocumentType(item.documentType)}
+                        {formatDocumentType(item.documentType, t)}
                       </td>
 
                       <td className={`px-4 py-3 text-xs ${softText}`}>
@@ -545,7 +554,7 @@ export default function AdminKyc() {
                       </td>
 
                       <td className="px-4 py-3">
-                        <StatusPill status={item.status} />
+                        <StatusPill status={item.status} t={t} />
                       </td>
 
                       <td className={`px-4 py-3 text-xs ${softText}`}>
@@ -562,12 +571,17 @@ export default function AdminKyc() {
 
       <Drawer
         open={Boolean(selected)}
-        title={selected ? `KYC Review - ${selected.fullName || "-"}` : "KYC Review"}
+        title={
+          selected
+            ? `${t("adminKyc.reviewTitle")} - ${selected.fullName || "-"}`
+            : t("adminKyc.reviewTitle")
+        }
         subtitle={
           selected
             ? `${getUserLabel(selectedUser)} · ${selectedUser.phoneNumber || "-"}`
             : ""
         }
+        closeLabel={t("adminKyc.close")}
         onClose={() => {
           setSelected(null);
           setRejectReason("");
@@ -575,14 +589,13 @@ export default function AdminKyc() {
       >
         {selected ? (
           <div className="space-y-5">
-
             <div className={drawerSectionClass}>
               <div className="mb-3">
                 <div className={`text-sm font-semibold ${strongText}`}>
-                  Document Images
+                  {t("adminKyc.documentImages")}
                 </div>
                 <div className={`mt-1 text-xs ${mutedText}`}>
-                  Click an image to open it in a new tab.
+                  {t("adminKyc.clickImageHint")}
                 </div>
               </div>
 
@@ -595,7 +608,7 @@ export default function AdminKyc() {
                         : "border-gray-200 text-gray-900"
                     }`}
                   >
-                    Front Document
+                    {t("adminKyc.frontDocument")}
                   </div>
 
                   {selected.frontImage?.url ? (
@@ -607,13 +620,13 @@ export default function AdminKyc() {
                     >
                       <img
                         src={selected.frontImage.url}
-                        alt="Front document"
+                        alt={t("adminKyc.frontDocumentAlt")}
                         className="h-80 w-full object-contain"
                       />
                     </a>
                   ) : (
                     <div className={`p-6 text-xs ${mutedText}`}>
-                      No front image uploaded.
+                      {t("adminKyc.noFrontImage")}
                     </div>
                   )}
                 </div>
@@ -626,7 +639,7 @@ export default function AdminKyc() {
                         : "border-gray-200 text-gray-900"
                     }`}
                   >
-                    Back Document
+                    {t("adminKyc.backDocument")}
                   </div>
 
                   {selected.backImage?.url ? (
@@ -638,13 +651,13 @@ export default function AdminKyc() {
                     >
                       <img
                         src={selected.backImage.url}
-                        alt="Back document"
+                        alt={t("adminKyc.backDocumentAlt")}
                         className="h-80 w-full object-contain"
                       />
                     </a>
                   ) : (
                     <div className={`p-6 text-xs ${mutedText}`}>
-                      No back image uploaded.
+                      {t("adminKyc.noBackImage")}
                     </div>
                   )}
                 </div>
@@ -654,49 +667,53 @@ export default function AdminKyc() {
             <div className={drawerSectionClass}>
               <div className="mb-3">
                 <div className={`text-sm font-semibold ${strongText}`}>
-                  Submitted Details
+                  {t("adminKyc.submittedDetails")}
                 </div>
                 <div className={`mt-1 text-xs ${mutedText}`}>
-                  Check that the submitted information matches the documents.
+                  {t("adminKyc.detailsHint")}
                 </div>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className={drawerCardClass}>
-                  <div className={drawerLabelClass}>Full Name</div>
+                  <div className={drawerLabelClass}>{t("adminKyc.fullName")}</div>
                   <div className={drawerValueClass}>{selected.fullName || "-"}</div>
                 </div>
 
                 <div className={drawerCardClass}>
-                  <div className={drawerLabelClass}>Document Type</div>
+                  <div className={drawerLabelClass}>{t("adminKyc.documentType")}</div>
                   <div className={drawerValueClass}>
-                    {formatDocumentType(selected.documentType)}
+                    {formatDocumentType(selected.documentType, t)}
                   </div>
                 </div>
 
                 <div className={drawerCardClass}>
-                  <div className={drawerLabelClass}>Document Number</div>
+                  <div className={drawerLabelClass}>
+                    {t("adminKyc.documentNumber")}
+                  </div>
                   <div className={drawerValueClass}>
                     {selected.documentNumber || "-"}
                   </div>
                 </div>
 
                 <div className={drawerCardClass}>
-                  <div className={drawerLabelClass}>Submitted At</div>
+                  <div className={drawerLabelClass}>{t("adminKyc.submittedAt")}</div>
                   <div className={drawerValueClass}>
                     {formatDate(selected.createdAt)}
                   </div>
                 </div>
 
                 <div className={drawerCardClass}>
-                  <div className={drawerLabelClass}>Reviewed At</div>
+                  <div className={drawerLabelClass}>{t("adminKyc.reviewedAt")}</div>
                   <div className={drawerValueClass}>
                     {formatDate(selected.reviewedAt)}
                   </div>
                 </div>
 
                 <div className={drawerCardClass}>
-                  <div className={drawerLabelClass}>Rejection Reason</div>
+                  <div className={drawerLabelClass}>
+                    {t("adminKyc.rejectionReason")}
+                  </div>
                   <div className={drawerValueClass}>
                     {selected.rejectionReason || "-"}
                   </div>
@@ -707,10 +724,10 @@ export default function AdminKyc() {
             <div className={drawerSectionClass}>
               <div className="mb-3">
                 <div className={`text-sm font-semibold ${strongText}`}>
-                  Review Decision
+                  {t("adminKyc.reviewDecision")}
                 </div>
                 <div className={`mt-1 text-xs ${mutedText}`}>
-                  Approving KYC will move waiting withdrawals to pending. Rejecting KYC will reject waiting withdrawals and return balance.
+                  {t("adminKyc.reviewDecisionHint")}
                 </div>
               </div>
 
@@ -722,13 +739,13 @@ export default function AdminKyc() {
                   className={primaryButtonClass}
                 >
                   <CheckCircle className="h-4 w-4" />
-                  Approve KYC
+                  {t("adminKyc.approveKyc")}
                 </button>
 
                 <textarea
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
-                  placeholder="Enter rejection reason..."
+                  placeholder={t("adminKyc.rejectReasonPlaceholder")}
                   rows={3}
                   className={inputClass}
                 />
@@ -740,8 +757,13 @@ export default function AdminKyc() {
                   className={dangerButtonClass}
                 >
                   <XCircle className="h-4 w-4" />
-                  Reject KYC
+                  {t("adminKyc.rejectKyc")}
                 </button>
+              </div>
+
+              <div className={`mt-4 text-xs ${mutedText}`}>
+                {t("adminKyc.currentStatus")}:{" "}
+                <span className={strongText}>{statusText(selected.status, t)}</span>
               </div>
             </div>
           </div>
