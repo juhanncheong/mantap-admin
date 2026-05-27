@@ -18,6 +18,7 @@ import BonusCreditPage from "./pages/BonusCredit";
 import AdminPopupsPage from "./pages/AdminPopupsPage";
 import AdminOrderList from "./pages/AdminOrderList";
 import { LanguageProvider } from "./context/LanguageContext";
+import AdminKycPage from "./pages/AdminKyc";
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="/admin/bonus-credit" element={<BonusCreditPage />} />
             <Route path="/admin/popups" element={<AdminPopupsPage />} />
             <Route path="/admin/orders/list" element={<AdminOrderList />} />
+            <Route path="/admin/kyc" element={<AdminKycPage />} />
       
             <Route path="*" element={<Navigate to="/admin/login" replace />} />
           </Routes>

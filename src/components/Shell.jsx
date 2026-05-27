@@ -2,6 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
+import { ShieldCheck } from "lucide-react";
 import {
   Users,
   Ticket,
@@ -486,6 +487,15 @@ export default function Shell({ title, children }) {
                 onNavigate={() => setMobileMenuOpen(false)}
               >
                 {t("nav.withdrawals")}
+              </SideLink>
+
+              <SideLink
+                theme={theme}
+                to="/admin/kyc"
+                icon={<ShieldCheck className="h-4 w-4 shrink-0" />}
+                onNavigate={() => setMobileMenuOpen(false)}
+              >
+                {t("nav.kyc")}
               </SideLink>
 
               <SideLink
