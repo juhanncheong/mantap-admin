@@ -208,8 +208,8 @@ export default function AdminKyc() {
     : "w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-400";
 
   const buttonClass = isDark
-    ? "rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70 hover:bg-white/10 disabled:opacity-50"
-    : "rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 disabled:opacity-50";
+    ? "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70 hover:bg-white/10 disabled:opacity-50"
+    : "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 disabled:opacity-50";
 
   const primaryButtonClass =
     "inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-500/15 disabled:opacity-50";
@@ -449,10 +449,14 @@ export default function AdminKyc() {
             <option value="REJECTED">{t("adminKyc.rejected")}</option>
           </select>
 
-          <button disabled={loading} onClick={loadKyc} className={buttonClass}>
-            <span className="inline-flex items-center gap-2">
-              <RefreshCw className={classNames("h-4 w-4", loading && "animate-spin")} />
-              {t("adminKyc.refresh")}
+          <button
+            disabled={loading}
+            onClick={loadKyc}
+            className={`${buttonClass} min-w-[88px] whitespace-nowrap`}
+          >
+            <span className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
+              <RefreshCw className={classNames("h-4 w-4 shrink-0", loading && "animate-spin")} />
+              <span className="whitespace-nowrap">{t("adminKyc.refresh")}</span>
             </span>
           </button>
         </div>
