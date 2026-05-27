@@ -8,7 +8,6 @@ import UsersPage from "./pages/Users";
 import OrdersPoolPage from "./pages/OrdersPool";
 import BonusTriggersPage from "./pages/BonusTriggers";
 import AdminWithdrawalsPage from "./pages/AdminWithdrawals";
-import AdminDepositsPage from "./pages/AdminDeposits";
 import AdminSigninRewardsPage from "./pages/AdminSigninRewards";
 import SettingsPage from "./pages/settings";
 import TrialBonus from "./pages/TrialBonus";
@@ -36,7 +35,7 @@ export default function App() {
             <Route path="/admin/orders/pool" element={<OrdersPoolPage />} />
             <Route path="/admin/orders/bonus" element={<BonusTriggersPage />} />
             <Route path="/admin/withdrawals" element={<AdminWithdrawalsPage />} />
-            <Route path="/admin/deposits" element={<AdminDepositsPage />} />
+            <Route path="/admin/deposits" element={<Navigate to="/admin/users" replace />} />
             <Route path="/admin/signin-rewards" element={<AdminSigninRewardsPage />} />
             <Route path="/admin/settings" element={<SettingsPage />} />
             <Route path="/admin/content" element={<Content />} />

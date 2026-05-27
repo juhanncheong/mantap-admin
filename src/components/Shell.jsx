@@ -28,7 +28,6 @@ const MAX_RECENT_TABS = 12;
 const TAB_LABEL_KEYS = {
   "/admin/users": "users",
   "/admin/withdrawals": "withdrawals",
-  "/admin/deposits": "deposits",
   "/admin/orders/list": "orderList",
   "/admin/trial-bonus": "trialBonus",
   "/admin/bonus-credit": "bonusCredit",
@@ -47,7 +46,8 @@ function isTrackableAdminPath(pathname) {
   return (
     pathname.startsWith("/admin/") &&
     pathname !== "/admin/login" &&
-    pathname !== "/admin/dashboard"
+    pathname !== "/admin/dashboard" &&
+    pathname !== "/admin/deposits"
   );
 }
 
@@ -486,15 +486,6 @@ export default function Shell({ title, children }) {
                 onNavigate={() => setMobileMenuOpen(false)}
               >
                 {t("nav.withdrawals")}
-              </SideLink>
-
-              <SideLink
-                theme={theme}
-                to="/admin/deposits"
-                icon={<Wallet className="h-4 w-4 shrink-0" />}
-                onNavigate={() => setMobileMenuOpen(false)}
-              >
-                {t("nav.deposits")}
               </SideLink>
 
               <SideLink
