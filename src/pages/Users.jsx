@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Shell from "../components/Shell";
 import { toast } from "react-toastify";
@@ -45,57 +45,6 @@ function classNames(...xs) {
   return xs.filter(Boolean).join(" ");
 }
 
-function sortUsersList(list, sortBy) {
-  const next = [...list];
-
-  next.sort((a, b) => {
-    if (sortBy === "createdAt_desc") {
-      return (
-        new Date(b.createdAt || 0).getTime() -
-        new Date(a.createdAt || 0).getTime()
-      );
-    }
-
-    if (sortBy === "createdAt_asc") {
-      return (
-        new Date(a.createdAt || 0).getTime() -
-        new Date(b.createdAt || 0).getTime()
-      );
-    }
-
-    if (sortBy === "lastOnline_desc") {
-      return (
-        new Date(b.lastOnlineAt || 0).getTime() -
-        new Date(a.lastOnlineAt || 0).getTime()
-      );
-    }
-
-    if (sortBy === "balance_desc") {
-      return safeNum(b.displayBalance ?? b.balance) - safeNum(a.displayBalance ?? a.balance);
-    }
-
-    if (sortBy === "balance_asc") {
-      return safeNum(a.displayBalance ?? a.balance) - safeNum(b.displayBalance ?? b.balance);
-    }
-
-    if (sortBy === "orders_desc") {
-      return safeNum(b.ordersCompleted) - safeNum(a.ordersCompleted);
-    }
-
-    if (sortBy === "orders_asc") {
-      return safeNum(a.ordersCompleted) - safeNum(b.ordersCompleted);
-    }
-
-    if (sortBy === "pending_desc") {
-      return safeNum(b.pendingAmount) - safeNum(a.pendingAmount);
-    }
-
-    return 0;
-  });
-
-  return next;
-}
-
 /** Premium modal (click outside + ESC to close) */
 function Modal({ open, title, subtitle, children, onClose, footer }) {
   const cardRef = useRef(null);
@@ -127,10 +76,14 @@ function Modal({ open, title, subtitle, children, onClose, footer }) {
       : "relative w-full max-w-lg overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl";
 
   const titleClass =
-    theme === "dark" ? "text-base font-semibold text-white" : "text-base font-semibold text-gray-900";
+    theme === "dark"
+      ? "text-base font-semibold text-white"
+      : "text-base font-semibold text-gray-900";
 
   const subtitleClass =
-    theme === "dark" ? "mt-1 text-xs text-white/50" : "mt-1 text-xs text-gray-500";
+    theme === "dark"
+      ? "mt-1 text-xs text-white/50"
+      : "mt-1 text-xs text-gray-500";
 
   const closeBtnClass =
     theme === "dark"
@@ -148,10 +101,14 @@ function Modal({ open, title, subtitle, children, onClose, footer }) {
       : "rounded-2xl border border-gray-200 bg-gray-50 p-3";
 
   const modalLabelClass =
-    theme === "dark" ? "text-xs font-semibold text-white" : "text-xs font-semibold text-gray-900";
+    theme === "dark"
+      ? "text-xs font-semibold text-white"
+      : "text-xs font-semibold text-gray-900";
 
   const modalHintClass =
-    theme === "dark" ? "mt-2 text-[11px] text-white/40" : "mt-2 text-[11px] text-gray-500";
+    theme === "dark"
+      ? "mt-2 text-[11px] text-white/40"
+      : "mt-2 text-[11px] text-gray-500";
 
   return (
     <div
@@ -169,7 +126,9 @@ function Modal({ open, title, subtitle, children, onClose, footer }) {
             {subtitle ? <div className={subtitleClass}>{subtitle}</div> : null}
           </div>
 
-          <button onClick={onClose} className={closeBtnClass}>✕</button>
+          <button onClick={onClose} className={closeBtnClass}>
+            ✕
+          </button>
         </div>
 
         <div className="px-5 pb-5">{children}</div>
@@ -395,71 +354,65 @@ export default function Users() {
   const mutedText = theme === "dark" ? "text-white/50" : "text-gray-500";
   const softText = theme === "dark" ? "text-white/70" : "text-gray-600";
   const strongText = theme === "dark" ? "text-white" : "text-gray-900";
-  
+
   const cardClass =
     theme === "dark"
       ? "rounded-2xl border border-white/10 bg-white/5"
       : "rounded-2xl border border-gray-200 bg-white shadow-sm";
-  
+
   const inputClass =
     theme === "dark"
       ? "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
       : "w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-400";
-  
+
   const selectClass =
     theme === "dark"
       ? "appearance-none rounded-xl border border-white/10 bg-[#111827] px-3 py-2 text-xs text-white outline-none hover:bg-[#182236]"
       : "appearance-none rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 outline-none hover:bg-gray-50";
 
   const optionClass =
-    theme === "dark"
-      ? "bg-[#111827] text-white"
-      : "bg-white text-gray-900";    
-  
+    theme === "dark" ? "bg-[#111827] text-white" : "bg-white text-gray-900";
+
   const buttonClass =
     theme === "dark"
       ? "rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70 hover:bg-white/10"
       : "rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 hover:bg-gray-50";
-  
+
   const tableWrapClass =
     theme === "dark"
       ? "mt-4 overflow-hidden rounded-2xl border border-white/10"
       : "mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm";
-  
+
   const tableHeaderBarClass =
     theme === "dark"
       ? "bg-white/5 px-4 py-3 text-sm font-semibold"
       : "bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-900";
-  
+
   const tableHeadClass =
     theme === "dark"
       ? "bg-white/5 text-xs text-white/60"
       : "bg-gray-50 text-xs text-gray-500";
-  
+
   const tableBodyClass =
-    theme === "dark"
-      ? "divide-y divide-white/10"
-      : "divide-y divide-gray-200";
-  
+    theme === "dark" ? "divide-y divide-white/10" : "divide-y divide-gray-200";
+
   const tableRowClass =
-    theme === "dark"
-      ? "hover:bg-white/5"
-      : "hover:bg-gray-50";
-  
+    theme === "dark" ? "hover:bg-white/5" : "hover:bg-gray-50";
+
   const footerBarClass =
     theme === "dark"
       ? "flex flex-col gap-3 border-t border-white/10 bg-white/5 px-4 py-3 md:flex-row md:items-center md:justify-between"
       : "flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-4 py-3 md:flex-row md:items-center md:justify-between";
-  
+
   const drawerSectionClass =
     theme === "dark"
-    ? "rounded-3xl border border-white/10 bg-white/[0.03] p-4"
-    : "rounded-3xl border border-gray-200 bg-gray-50 p-4";
+      ? "rounded-3xl border border-white/10 bg-white/[0.03] p-4"
+      : "rounded-3xl border border-gray-200 bg-gray-50 p-4";
 
   const drawerCardClass =
     theme === "dark"
-    ? "rounded-2xl border border-white/10 bg-white/[0.04] p-4"
-    : "rounded-2xl border border-gray-200 bg-white p-4";
+      ? "rounded-2xl border border-white/10 bg-white/[0.04] p-4"
+      : "rounded-2xl border border-gray-200 bg-white p-4";
 
   const drawerLabelClass =
     theme === "dark" ? "text-xs text-white/50" : "text-xs text-gray-500";
@@ -468,15 +421,17 @@ export default function Users() {
     theme === "dark"
       ? "mt-1 text-sm font-semibold text-white"
       : "mt-1 text-sm font-semibold text-gray-900";
-  
+
   const drawerMutedClass =
-    theme === "dark" ? "text-[11px] text-white/50" : "text-[11px] text-gray-500";
-  
+    theme === "dark"
+      ? "text-[11px] text-white/50"
+      : "text-[11px] text-gray-500";
+
   const drawerNeutralButtonClass =
     theme === "dark"
       ? "rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-left text-xs text-white/80 hover:bg-white/[0.07]"
       : "rounded-2xl border border-gray-200 bg-white px-4 py-3 text-left text-xs text-gray-800 hover:bg-gray-50";
-  
+
   const pillNeutralClass =
     theme === "dark"
       ? "rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] text-white/80"
@@ -491,7 +446,7 @@ export default function Users() {
     theme === "dark"
       ? "inline-flex rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] font-semibold text-white/80"
       : "inline-flex rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-[10px] font-semibold text-gray-700";
-  
+
   const skeletonCellClass =
     theme === "dark"
       ? "h-3 rounded-full bg-white/10"
@@ -503,7 +458,7 @@ export default function Users() {
     { value: "super_agent", label: "Super Agent" },
     { value: "admin", label: t("users.admin") },
   ];
-  
+
   const sortOptions = [
     { value: "createdAt_desc", label: t("users.sortNewest") },
     { value: "createdAt_asc", label: t("users.sortOldest") },
@@ -514,19 +469,19 @@ export default function Users() {
     { value: "orders_asc", label: t("users.sortLeastOrders") },
     { value: "pending_desc", label: t("users.sortHighestPending") },
   ];
-  
+
   const pageSizeOptions = [
     { value: 10, label: "10 / page" },
     { value: 20, label: "20 / page" },
     { value: 100, label: "100 / page" },
   ];
-  
+
   const vipRankOptions = [
     { value: "1", label: `${t("users.rank")} 1` },
     { value: "2", label: `${t("users.rank")} 2` },
     { value: "3", label: `${t("users.rank")} 3` },
   ];
-  
+
   function LoadingSkeletonRows() {
     return Array.from({ length: 8 }).map((_, rowIndex) => (
       <tr key={`skeleton-${rowIndex}`} className={tableRowClass}>
@@ -539,12 +494,12 @@ export default function Users() {
                   colIndex === 0
                     ? "64px"
                     : colIndex === 1
-                    ? "110px"
-                    : colIndex === 2
-                    ? "90px"
-                    : colIndex === 8
-                    ? "180px"
-                    : "80px",
+                      ? "110px"
+                      : colIndex === 2
+                        ? "90px"
+                        : colIndex === 8
+                          ? "180px"
+                          : "80px",
               }}
             />
           </td>
@@ -553,22 +508,26 @@ export default function Users() {
     ));
   }
 
-    const initialCache = loadUsersCache();
+  const initialCache = loadUsersCache();
 
-    const [rows, setRows] = useState(() => initialCache?.rows || []);
-    const [loading, setLoading] = useState(() => !initialCache?.rows?.length);
-    const [busyId, setBusyId] = useState(null);
-  
-    const [q, setQ] = useState(() => initialCache?.q || "");
-    const [roleFilter, setRoleFilter] = useState(() => initialCache?.roleFilter || "all");
-    const [sortBy, setSortBy] = useState(() => initialCache?.sortBy || "createdAt_desc");
+  const [rows, setRows] = useState(() => initialCache?.rows || []);
+  const [loading, setLoading] = useState(() => !initialCache?.rows?.length);
+  const [busyId, setBusyId] = useState(null);
 
-    const [orderEdit, setOrderEdit] = useState({});
-    const [resetEdit, setResetEdit] = useState({});
-    const [vipEdit, setVipEdit] = useState({});
-    const [creditScoreEdit, setCreditScoreEdit] = useState({});
-  
-    const [walletSummary, setWalletSummary] = useState({
+  const [q, setQ] = useState(() => initialCache?.q || "");
+  const [roleFilter, setRoleFilter] = useState(
+    () => initialCache?.roleFilter || "all",
+  );
+  const [sortBy, setSortBy] = useState(
+    () => initialCache?.sortBy || "createdAt_desc",
+  );
+
+  const [orderEdit, setOrderEdit] = useState({});
+  const [resetEdit, setResetEdit] = useState({});
+  const [vipEdit, setVipEdit] = useState({});
+  const [creditScoreEdit, setCreditScoreEdit] = useState({});
+
+  const [walletSummary, setWalletSummary] = useState({
     loading: false,
     userId: null,
     totalDeposit: 0,
@@ -578,6 +537,16 @@ export default function Users() {
   // pagination
   const [pageSize, setPageSize] = useState(() => initialCache?.pageSize || 10);
   const [page, setPage] = useState(() => initialCache?.page || 1);
+
+  const [pagination, setPagination] = useState(
+    () =>
+      initialCache?.pagination || {
+        page: 1,
+        limit: initialCache?.pageSize || 10,
+        total: 0,
+        totalPages: 1,
+      },
+  );
 
   // Balance modal
   const [balanceModal, setBalanceModal] = useState({
@@ -665,7 +634,7 @@ export default function Users() {
       hasAuth: !!auth,
     });
 
-   if (!auth) {
+    if (!auth) {
       console.error("[Users] Missing admin_token for:", url);
       throw new Error("Please login again.");
     }
@@ -693,27 +662,27 @@ export default function Users() {
       data,
     });
 
-  if (!res.ok) {
-    const msg = data?.message || `Request failed (${res.status})`;
+    if (!res.ok) {
+      const msg = data?.message || `Request failed (${res.status})`;
 
-    if (res.status === 401) {
-      console.error("[Users] 401 from:", url, data);
+      if (res.status === 401) {
+        console.error("[Users] 401 from:", url, data);
+      }
+
+      throw new Error(msg);
     }
 
-    throw new Error(msg);
+    return data;
   }
-
-  return data;
-}
 
   async function copyUid(uid) {
     const clean = String(uid || "").trim();
-  
+
     if (!clean) {
       toast.error("No UID to copy");
       return;
     }
-  
+
     try {
       await navigator.clipboard.writeText(clean);
       toast.success("UID copied");
@@ -722,19 +691,49 @@ export default function Users() {
     }
   }
 
-  async function loadUsers(forceRefresh = true) {
+  async function loadUsers(forceRefresh = true, override = {}) {
+    const nextPage = override.page ?? page;
+    const nextPageSize = override.pageSize ?? pageSize;
+    const nextQ = override.q ?? q;
+    const nextRole = override.roleFilter ?? roleFilter;
+    const nextSortBy = override.sortBy ?? sortBy;
+
     if (forceRefresh) {
       setLoading(true);
     }
-  
+
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users`);
+      const params = new URLSearchParams({
+        page: String(nextPage),
+        limit: String(nextPageSize),
+        q: String(nextQ || ""),
+        role: String(nextRole || "all"),
+        sortBy: String(nextSortBy || "createdAt_desc"),
+      });
+
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users?${params.toString()}`,
+      );
+
       const nextRows = data.users || [];
-  
+      const nextPagination = data.pagination || {
+        page: nextPage,
+        limit: nextPageSize,
+        total: nextRows.length,
+        totalPages: 1,
+      };
+
       setRows(nextRows);
-  
+      setPagination(nextPagination);
+
       saveUsersCache({
         rows: nextRows,
+        q: nextQ,
+        roleFilter: nextRole,
+        sortBy: nextSortBy,
+        page: nextPagination.page || nextPage,
+        pageSize: nextPagination.limit || nextPageSize,
+        pagination: nextPagination,
         savedAt: Date.now(),
       });
     } catch (e) {
@@ -759,16 +758,19 @@ export default function Users() {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/vip-rank`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vipRank: num }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/vip-rank`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ vipRank: num }),
+        },
+      );
 
       const newRank = data?.user?.vipRank ?? data?.vipRank ?? num;
 
       setRows((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, vipRank: newRank } : u))
+        prev.map((u) => (u._id === userId ? { ...u, vipRank: newRank } : u)),
       );
 
       toast.success("VIP rank updated");
@@ -791,11 +793,14 @@ export default function Users() {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/orders/set`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ordersCompleted: num }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/orders/set`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ordersCompleted: num }),
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
@@ -804,8 +809,8 @@ export default function Users() {
                 ...u,
                 ordersCompleted: data.ordersCompleted ?? num,
               }
-            : u
-        )
+            : u,
+        ),
       );
 
       toast.success("Orders updated");
@@ -828,18 +833,21 @@ export default function Users() {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/reset-count/set`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ totalResetCount: num }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/reset-count/set`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ totalResetCount: num }),
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
           u._id === userId
             ? { ...u, totalResetCount: data.totalResetCount ?? num }
-            : u
-        )
+            : u,
+        ),
       );
 
       toast.success("Reset count updated");
@@ -854,9 +862,12 @@ export default function Users() {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/orders/reset`, {
-        method: "POST",
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/orders/reset`,
+        {
+          method: "POST",
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
@@ -865,8 +876,8 @@ export default function Users() {
                 ...u,
                 ordersCompleted: data.ordersCompleted ?? 0,
               }
-            : u
-        )
+            : u,
+        ),
       );
 
       setOrderEdit((p) => ({ ...p, [userId]: "0" }));
@@ -882,14 +893,19 @@ export default function Users() {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/role`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/role`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role }),
+        },
+      );
 
       setRows((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, role: data.user.role } : u))
+        prev.map((u) =>
+          u._id === userId ? { ...u, role: data.user.role } : u,
+        ),
       );
 
       toast.success("Role updated");
@@ -914,19 +930,22 @@ export default function Users() {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/balance`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode: balanceModal.mode,
-          amount,
-        }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/balance`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: balanceModal.mode,
+            amount,
+          }),
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
-          u._id === userId ? { ...u, balance: data.user.balance } : u
-        )
+          u._id === userId ? { ...u, balance: data.user.balance } : u,
+        ),
       );
 
       toast.success("Balance updated");
@@ -949,28 +968,31 @@ export default function Users() {
   async function saveUserCreditScore(userId) {
     const val = creditScoreEdit[userId];
     const score = Number(val);
-  
+
     if (!Number.isFinite(score)) {
       toast.error("Credit score must be a number");
       return;
     }
-  
+
     if (score < 0 || score > 100) {
       toast.error("Credit score must be between 0 and 100");
       return;
     }
-  
+
     setBusyId(userId);
-  
+
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/credit-score`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ creditScore: score }),
-      });
-  
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/credit-score`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ creditScore: score }),
+        },
+      );
+
       const newScore = Number(data?.user?.creditScore ?? score);
-  
+
       setRows((prev) =>
         prev.map((u) =>
           u._id === userId
@@ -978,10 +1000,10 @@ export default function Users() {
                 ...u,
                 creditScore: newScore,
               }
-            : u
-        )
+            : u,
+        ),
       );
-  
+
       setActionsModal((prev) =>
         prev.user && prev.user._id === userId
           ? {
@@ -991,14 +1013,14 @@ export default function Users() {
                 creditScore: newScore,
               },
             }
-          : prev
+          : prev,
       );
-  
+
       setCreditScoreEdit((prev) => ({
         ...prev,
         [userId]: String(newScore),
       }));
-  
+
       toast.success("Credit score updated");
     } catch (e) {
       toast.error(e.message || "Failed to update credit score");
@@ -1011,7 +1033,9 @@ export default function Users() {
     if (!user?._id) return;
 
     const nextBlocked = !Boolean(user.withdrawalBlocked);
-    const reason = nextBlocked ? String(customReason || "Manual review").trim() : "";
+    const reason = nextBlocked
+      ? String(customReason || "Manual review").trim()
+      : "";
 
     setBusyId(user._id);
 
@@ -1025,7 +1049,7 @@ export default function Users() {
             blocked: nextBlocked,
             reason,
           }),
-        }
+        },
       );
 
       setRows((prev) =>
@@ -1037,8 +1061,8 @@ export default function Users() {
                 withdrawalBlockedAt: data.user.withdrawalBlockedAt,
                 withdrawalBlockedReason: data.user.withdrawalBlockedReason,
               }
-            : u
-        )
+            : u,
+        ),
       );
 
       setActionsModal((prev) =>
@@ -1052,13 +1076,13 @@ export default function Users() {
                 withdrawalBlockedReason: data.user.withdrawalBlockedReason,
               },
             }
-          : prev
+          : prev,
       );
 
       toast.success(
         data.user.withdrawalBlocked
           ? "Withdrawal frozen"
-          : "Withdrawal unfrozen"
+          : "Withdrawal unfrozen",
       );
     } catch (e) {
       toast.error(e.message || "Failed to update withdrawal block");
@@ -1069,11 +1093,11 @@ export default function Users() {
 
   async function toggleAgentHidden(user) {
     if (!user?._id) return;
-  
+
     const nextHidden = !Boolean(user.hiddenFromAgent);
-  
+
     setBusyId(user._id);
-  
+
     try {
       const data = await fetchJSON(
         `${API_BASE}/api/admin/users/${user._id}/agent-hidden`,
@@ -1083,9 +1107,9 @@ export default function Users() {
           body: JSON.stringify({
             hidden: nextHidden,
           }),
-        }
+        },
       );
-  
+
       setRows((prev) =>
         prev.map((u) =>
           u._id === user._id
@@ -1095,14 +1119,14 @@ export default function Users() {
                 hiddenFromAgentAt: data.user.hiddenFromAgentAt,
                 hiddenFromAgentBy: data.user.hiddenFromAgentBy,
               }
-            : u
-        )
+            : u,
+        ),
       );
-  
+
       toast.success(
         data.user.hiddenFromAgent
           ? "User hidden from agent"
-          : "User visible to agent again"
+          : "User visible to agent again",
       );
     } catch (e) {
       toast.error(e.message || "Failed to update agent visibility");
@@ -1118,14 +1142,17 @@ export default function Users() {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/ban`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          isBanned: banModal.isBanned,
-          reason: banModal.reason,
-        }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/ban`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            isBanned: banModal.isBanned,
+            reason: banModal.reason,
+          }),
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
@@ -1136,8 +1163,8 @@ export default function Users() {
                 bannedAt: data.user.bannedAt,
                 banReason: data.user.banReason,
               }
-            : u
-        )
+            : u,
+        ),
       );
 
       toast.success("Ban status updated");
@@ -1209,7 +1236,7 @@ export default function Users() {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ newPin: pin }),
-        }
+        },
       );
 
       setRows((prev) =>
@@ -1217,11 +1244,12 @@ export default function Users() {
           u._id === userId
             ? {
                 ...u,
-                withdrawPinFailedAttempts: data?.user?.withdrawPinFailedAttempts ?? 0,
+                withdrawPinFailedAttempts:
+                  data?.user?.withdrawPinFailedAttempts ?? 0,
                 withdrawPinLocked: data?.user?.withdrawPinLocked ?? false,
               }
-            : u
-        )
+            : u,
+        ),
       );
 
       toast.success("Withdrawal PIN reset + unlocked");
@@ -1252,16 +1280,19 @@ export default function Users() {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/reset-phone`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newPhoneNumber: clean }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/reset-phone`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ newPhoneNumber: clean }),
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
-          u._id === userId ? { ...u, phoneNumber: data.user.phoneNumber } : u
-        )
+          u._id === userId ? { ...u, phoneNumber: data.user.phoneNumber } : u,
+        ),
       );
 
       toast.success("Phone number updated");
@@ -1280,32 +1311,34 @@ export default function Users() {
   }
 
   async function loadWalletSummary(userId) {
-  setWalletSummary({
-    loading: true,
-    userId,
-    totalDeposit: 0,
-    totalWithdrawal: 0,
-  });
-
-  try {
-    const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/wallet-summary`);
-
     setWalletSummary({
-      loading: false,
-      userId,
-      totalDeposit: Number(data?.summary?.totalDeposit || 0),
-      totalWithdrawal: Number(data?.summary?.totalWithdrawal || 0),
-    });
-  } catch (e) {
-    setWalletSummary({
-      loading: false,
+      loading: true,
       userId,
       totalDeposit: 0,
       totalWithdrawal: 0,
     });
-    toast.error(e.message || "Failed to load wallet summary");
+
+    try {
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/wallet-summary`,
+      );
+
+      setWalletSummary({
+        loading: false,
+        userId,
+        totalDeposit: Number(data?.summary?.totalDeposit || 0),
+        totalWithdrawal: Number(data?.summary?.totalWithdrawal || 0),
+      });
+    } catch (e) {
+      setWalletSummary({
+        loading: false,
+        userId,
+        totalDeposit: 0,
+        totalWithdrawal: 0,
+      });
+      toast.error(e.message || "Failed to load wallet summary");
+    }
   }
-}
 
   async function submitDelete() {
     const userId = deleteModal.userId;
@@ -1378,9 +1411,10 @@ export default function Users() {
       sortBy,
       page,
       pageSize,
+      pagination,
       savedAt: Date.now(),
     });
-  }, [rows, q, roleFilter, sortBy, page, pageSize]);
+  }, [rows, q, roleFilter, sortBy, page, pageSize, pagination]);
 
   useEffect(() => {
     const cache = loadUsersCache();
@@ -1392,69 +1426,54 @@ export default function Users() {
       setSortBy(cache.sortBy || "createdAt_desc");
       setPage(cache.page || 1);
       setPageSize(cache.pageSize || 10);
+      setPagination(
+        cache.pagination || {
+          page: cache.page || 1,
+          limit: cache.pageSize || 10,
+          total: cache.rows.length,
+          totalPages: 1,
+        },
+      );
       setLoading(false);
-      return;
-  }
-
-    loadUsers(true);
+    }
   }, []);
 
-  const filtered = useMemo(() => {
-    const qq = q.trim().toLowerCase();
-    return rows.filter((u) => {
-      const matchesQuery =
-        !qq ||
-        String(u.phoneNumber || "").toLowerCase().includes(qq) ||
-        String(u.uid || "").toLowerCase().includes(qq) ||
-        String(u._id || "").toLowerCase().includes(qq) ||
-        String(u.registeredIp || "").toLowerCase().includes(qq);
-
-      const matchesRole =
-        roleFilter === "all" ? true : String(u.role) === roleFilter;
-
-      return matchesQuery && matchesRole;
-    });
-  }, [rows, q, roleFilter]);
-
   useEffect(() => {
-    setPage(1);
-  }, [q, roleFilter, sortBy, pageSize]);
-  
-  const sortedFiltered = useMemo(() => {
-    return sortUsersList(filtered, sortBy);
-  }, [filtered, sortBy]);
-  
-  const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / pageSize));
-  
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages);
-    }
-  }, [page, totalPages]);
-  
-  const paginatedRows = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return sortedFiltered.slice(start, start + pageSize);
-  }, [sortedFiltered, page, pageSize]);
+    const timer = setTimeout(
+      () => {
+        loadUsers(true);
+      },
+      q ? 500 : 0,
+    );
+
+    return () => clearTimeout(timer);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, roleFilter, sortBy, q]);
+
+  const totalUsers = Number(pagination?.total || 0);
+  const totalPages = Math.max(1, Number(pagination?.totalPages || 1));
+  const paginatedRows = rows;
 
   return (
     <Shell title={t("users.title")}>
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className={`text-xs ${mutedText}`}>
-          {t("users.subtitle")}
-        </div>
-  
+        <div className={`text-xs ${mutedText}`}>{t("users.subtitle")}</div>
+
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
           <input
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setPage(1);
+            }}
             placeholder={t("users.searchPlaceholder")}
             className={`${inputClass} md:w-64`}
           />
-          
+
           <button
             disabled={loading}
-            onClick={loadUsers}
+            onClick={() => loadUsers(true)}
             className={`${buttonClass} disabled:opacity-50`}
           >
             {t("users.refresh")}
@@ -1462,18 +1481,24 @@ export default function Users() {
 
           <CustomSelect
             value={roleFilter}
-            onChange={setRoleFilter}
+            onChange={(val) => {
+              setRoleFilter(val);
+              setPage(1);
+            }}
             options={roleOptions}
             className="md:w-44"
           />
-  
+
           <CustomSelect
             value={sortBy}
-            onChange={setSortBy}
+            onChange={(val) => {
+              setSortBy(val);
+              setPage(1);
+            }}
             options={sortOptions}
             className="md:w-56"
           />
-  
+
           <button
             onClick={() =>
               setCreateUserModal({
@@ -1493,12 +1518,12 @@ export default function Users() {
           </button>
         </div>
       </div>
-  
+
       <div className={tableWrapClass}>
         <div className={tableHeaderBarClass}>
-          {t("users.usersCount")} ({filtered.length})
+          {t("users.usersCount")} ({totalUsers})
         </div>
-  
+
         <div className="users-table-scroll overflow-x-auto">
           <table className="min-w-[2350px] text-left text-sm">
             <thead className={tableHeadClass}>
@@ -1521,11 +1546,11 @@ export default function Users() {
                 <th className="px-4 py-3">{t("users.role")}</th>
               </tr>
             </thead>
-  
+
             <tbody className={tableBodyClass}>
               {loading ? (
                 <LoadingSkeletonRows />
-              ) : filtered.length === 0 ? (
+              ) : rows.length === 0 ? (
                 <tr>
                   <td className={`px-4 py-5 ${softText}`} colSpan={16}>
                     {t("users.noUsersFound")}
@@ -1535,7 +1560,7 @@ export default function Users() {
                 paginatedRows.map((u) => {
                   const isBusy = busyId === u._id;
                   const banned = Boolean(u.isBanned);
-  
+
                   return (
                     <tr key={u._id} className={tableRowClass}>
                       <td className="px-4 py-3">
@@ -1556,19 +1581,19 @@ export default function Users() {
                           </button>
                         </div>
                       </td>
-  
+
                       <td className="px-4 py-3">
                         <div className={`text-xs ${strongText}`}>
                           {u.phoneNumber || "-"}
                         </div>
-  
+
                         {banned ? (
                           <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-red-500/25 bg-red-500/10 px-2 py-1 text-[10px] text-red-200">
                             {t("users.banned")}
                           </div>
                         ) : null}
                       </td>
-  
+
                       <td className="px-4 py-3">
                         <div
                           className={`cursor-pointer select-none text-xs ${softText}`}
@@ -1578,7 +1603,7 @@ export default function Users() {
                           {u.uid || "-"}
                         </div>
                       </td>
-  
+
                       <td className="px-4 py-3">
                         <div
                           className={`max-w-[140px] truncate text-xs ${softText}`}
@@ -1587,7 +1612,7 @@ export default function Users() {
                           {u?.referredBy?.phoneNumber || "-"}
                         </div>
                       </td>
-  
+
                       <td className="px-4 py-3">
                         {u.registeredCountry ? (
                           <div
@@ -1609,14 +1634,14 @@ export default function Users() {
                             ) : (
                               <img
                                 src={`https://flagcdn.com/24x18/${String(
-                                  u.registeredCountry
+                                  u.registeredCountry,
                                 ).toLowerCase()}.png`}
                                 alt={String(u.registeredCountry).toUpperCase()}
                                 className="h-[14px] w-[18px] rounded-[2px] object-cover"
                                 loading="lazy"
                               />
                             )}
-                      
+
                             <span>
                               {String(u.registeredCountry) === "ADMIN_CREATED"
                                 ? "Admin Created"
@@ -1627,7 +1652,7 @@ export default function Users() {
                           <div className={`text-xs ${softText}`}>-</div>
                         )}
                       </td>
-  
+
                       <td className="px-4 py-3">
                         <div
                           className={`text-xs ${
@@ -1637,13 +1662,13 @@ export default function Users() {
                           {safeNum(u.pendingAmount).toFixed(2)}
                         </div>
                       </td>
-  
+
                       <td className="px-4 py-3">
                         <div className={`text-xs ${strongText}`}>
                           {safeNum(u.displayBalance).toFixed(2)}
                         </div>
                       </td>
-  
+
                       <td className="px-4 py-3">
                         <button
                           disabled={isBusy}
@@ -1667,7 +1692,7 @@ export default function Users() {
                           {t("users.add")}
                         </button>
                       </td>
-  
+
                       <td className="px-4 py-3">
                         <div className={`text-xs ${strongText}`}>
                           {safeNum(u.ordersCompleted)}/
@@ -1676,13 +1701,12 @@ export default function Users() {
                             : "-"}
                         </div>
                       </td>
-  
+
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <input
                             value={
-                              orderEdit[u._id] ??
-                              String(u.ordersCompleted ?? 0)
+                              orderEdit[u._id] ?? String(u.ordersCompleted ?? 0)
                             }
                             onChange={(e) =>
                               setOrderEdit((p) => ({
@@ -1698,7 +1722,7 @@ export default function Users() {
                             placeholder="0"
                             disabled={isBusy}
                           />
-  
+
                           <button
                             disabled={isBusy}
                             onClick={() => saveUserOrders(u._id)}
@@ -1711,7 +1735,7 @@ export default function Users() {
                           >
                             {t("users.save")}
                           </button>
-  
+
                           <button
                             disabled={isBusy}
                             onClick={() => resetUserOrdersCount(u._id)}
@@ -1726,17 +1750,16 @@ export default function Users() {
                           </button>
                         </div>
                       </td>
-  
+
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className={`text-xs ${strongText}`}>
                             {safeNum(u.totalResetCount || 1)}
                           </div>
-  
+
                           <input
                             value={
-                              resetEdit[u._id] ??
-                              String(u.totalResetCount ?? 1)
+                              resetEdit[u._id] ?? String(u.totalResetCount ?? 1)
                             }
                             onChange={(e) =>
                               setResetEdit((p) => ({
@@ -1752,7 +1775,7 @@ export default function Users() {
                             placeholder="1"
                             disabled={isBusy}
                           />
-  
+
                           <button
                             disabled={isBusy}
                             onClick={() => saveUserResetCount(u._id)}
@@ -1767,7 +1790,7 @@ export default function Users() {
                           </button>
                         </div>
                       </td>
-  
+
                       <td className="px-4 py-3">
                         <div
                           className={`max-w-[180px] truncate text-xs ${softText}`}
@@ -1776,15 +1799,15 @@ export default function Users() {
                           {u.registeredIp || "-"}
                         </div>
                       </td>
-  
+
                       <td className={`px-4 py-3 text-xs ${softText}`}>
                         {formatDate(u.lastOnlineAt)}
                       </td>
-  
+
                       <td className={`px-4 py-3 text-xs ${softText}`}>
                         {formatDate(u.createdAt)}
                       </td>
-                      
+
                       <td className="px-4 py-3">
                         <button
                           disabled={isBusy}
@@ -1795,8 +1818,8 @@ export default function Users() {
                                 ? "border-red-500/25 bg-red-500/10 text-red-200 hover:bg-red-500/15"
                                 : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
                               : theme === "dark"
-                              ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15"
-                              : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15"
+                                : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                           }`}
                           title={
                             u.hiddenFromAgent
@@ -1807,7 +1830,7 @@ export default function Users() {
                           {u.hiddenFromAgent ? "Hidden" : "Visible"}
                         </button>
                       </td>
-                      
+
                       <td className="px-4 py-3">
                         <span
                           className={`rounded-full px-2 py-1 text-[10px] ${
@@ -1826,15 +1849,15 @@ export default function Users() {
             </tbody>
           </table>
         </div>
-  
+
         <div className={footerBarClass}>
           <div className={`text-xs ${mutedText}`}>
             {t("users.showing")}{" "}
-            {filtered.length === 0 ? 0 : (page - 1) * pageSize + 1}{" "}
-            {t("users.to")} {Math.min(page * pageSize, filtered.length)}{" "}
-            {t("users.of")} {filtered.length} {t("users.users")}
+            {totalUsers === 0 ? 0 : (page - 1) * pageSize + 1} {t("users.to")}{" "}
+            {Math.min(page * pageSize, totalUsers)} {t("users.of")} {totalUsers}{" "}
+            {t("users.users")}
           </div>
-  
+
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
               <span className={`text-xs ${mutedText}`}>
@@ -1842,13 +1865,16 @@ export default function Users() {
               </span>
               <CustomSelect
                 value={pageSize}
-                onChange={(val) => setPageSize(Number(val))}
+                onChange={(val) => {
+                  setPageSize(Number(val));
+                  setPage(1);
+                }}
                 options={pageSizeOptions}
                 className="w-32"
                 placement="top"
               />
             </div>
-  
+
             <div className="flex items-center gap-2">
               <button
                 disabled={page <= 1}
@@ -1857,11 +1883,11 @@ export default function Users() {
               >
                 {t("users.prev")}
               </button>
-  
+
               <div className={`text-xs ${softText}`}>
                 {t("users.page")} {totalPages === 0 ? 1 : page} / {totalPages}
               </div>
-  
+
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
@@ -1873,7 +1899,7 @@ export default function Users() {
           </div>
         </div>
       </div>
-  
+
       <Modal
         open={withdrawalBlockModal.open}
         title={t("users.freezeWithdrawal")}
@@ -1911,21 +1937,21 @@ export default function Users() {
             >
               {t("users.cancel")}
             </button>
-  
+
             <button
               disabled={busyId === withdrawalBlockModal.userId}
               onClick={async () => {
                 const user = rows.find(
-                  (x) => x._id === withdrawalBlockModal.userId
+                  (x) => x._id === withdrawalBlockModal.userId,
                 );
-  
+
                 if (!user) {
                   toast.error(t("users.userNotFound"));
                   return;
                 }
-  
+
                 await toggleWithdrawalBlock(user, withdrawalBlockModal.reason);
-  
+
                 setWithdrawalBlockModal({
                   open: false,
                   userId: null,
@@ -1957,7 +1983,7 @@ export default function Users() {
           >
             {t("users.freezeWarning")}
           </div>
-  
+
           <div
             className={
               theme === "dark"
@@ -1974,7 +2000,7 @@ export default function Users() {
             >
               {t("users.reason")}
             </div>
-  
+
             <input
               value={withdrawalBlockModal.reason}
               onChange={(e) =>
@@ -1993,14 +2019,14 @@ export default function Users() {
           </div>
         </div>
       </Modal>
-  
+
       <Modal
         open={balanceModal.open}
         title={t("users.editBalance")}
         subtitle={
           balanceModal.userId
             ? `${t("users.userLabel")}: ${balanceModal.phoneNumber} • ${t(
-                "users.current"
+                "users.current",
               )}: ${safeNum(balanceModal.currentBalance).toFixed(2)}`
             : ""
         }
@@ -2035,7 +2061,7 @@ export default function Users() {
             >
               {t("users.cancel")}
             </button>
-  
+
             <button
               disabled={busyId === balanceModal.userId}
               onClick={submitBalance}
@@ -2069,7 +2095,7 @@ export default function Users() {
             >
               {t("users.mode")}
             </div>
-  
+
             <div className="mt-2 grid grid-cols-2 gap-2">
               <button
                 onClick={() => setBalanceModal((p) => ({ ...p, mode: "inc" }))}
@@ -2080,18 +2106,16 @@ export default function Users() {
                       ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
                       : "border-emerald-300 bg-emerald-50 text-emerald-700"
                     : theme === "dark"
-                    ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
-                    : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                      ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
+                      : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
                 )}
               >
-                <div className="font-semibold">
-                  {t("users.addSubtract")}
-                </div>
+                <div className="font-semibold">{t("users.addSubtract")}</div>
                 <div className="mt-1 text-[11px] opacity-70">
                   {t("users.useNegative")}
                 </div>
               </button>
-  
+
               <button
                 onClick={() => setBalanceModal((p) => ({ ...p, mode: "set" }))}
                 className={classNames(
@@ -2101,8 +2125,8 @@ export default function Users() {
                       ? "border-blue-500/40 bg-blue-500/10 text-blue-200"
                       : "border-blue-300 bg-blue-50 text-blue-700"
                     : theme === "dark"
-                    ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
-                    : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                      ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
+                      : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
                 )}
               >
                 <div className="font-semibold">{t("users.setBalance")}</div>
@@ -2112,7 +2136,7 @@ export default function Users() {
               </button>
             </div>
           </div>
-  
+
           <div
             className={
               theme === "dark"
@@ -2129,7 +2153,7 @@ export default function Users() {
             >
               {t("users.amount")}
             </div>
-  
+
             <input
               value={balanceModal.amount}
               onChange={(e) =>
@@ -2146,7 +2170,7 @@ export default function Users() {
                   : "mt-2 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 outline-none focus:border-gray-400"
               }
             />
-  
+
             <div
               className={
                 theme === "dark"
@@ -2159,14 +2183,14 @@ export default function Users() {
           </div>
         </div>
       </Modal>
-  
+
       <Drawer
         open={actionsModal.open}
         title={t("users.userActions")}
         subtitle={
           actionsModal.user
             ? `${t("users.userLabel")}: ${actionsModal.user.phoneNumber} • ${t(
-                "users.role"
+                "users.role",
               )}: ${actionsModal.user.role}`
             : ""
         }
@@ -2189,7 +2213,7 @@ export default function Users() {
                   {actionsModal.user.uid || "-"}
                 </div>
               </div>
-  
+
               <div className={drawerCardClass}>
                 <div className="flex items-center justify-between gap-3">
                   <div className={drawerLabelClass}>
@@ -2201,14 +2225,14 @@ export default function Users() {
                       : t("users.active")}
                   </div>
                 </div>
-  
+
                 {actionsModal.user.withdrawalBlockedReason ? (
                   <div className={`mt-2 ${drawerMutedClass}`}>
                     {t("users.reason")}:{" "}
                     {actionsModal.user.withdrawalBlockedReason}
                   </div>
                 ) : null}
-  
+
                 {actionsModal.user.withdrawalBlockedAt ? (
                   <div className={`mt-1 ${drawerMutedClass}`}>
                     {t("users.since")}:{" "}
@@ -2217,7 +2241,7 @@ export default function Users() {
                 ) : null}
               </div>
             </div>
-  
+
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div className={drawerCardClass}>
                 <div className={drawerLabelClass}>
@@ -2230,7 +2254,7 @@ export default function Users() {
                     : safeNum(walletSummary.totalDeposit).toFixed(2)}
                 </div>
               </div>
-  
+
               <div className={drawerCardClass}>
                 <div className={drawerLabelClass}>
                   {t("users.totalWithdrawal")}
@@ -2243,11 +2267,11 @@ export default function Users() {
                 </div>
               </div>
             </div>
-  
+
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
               <div className={drawerSectionClass}>
                 <div className={drawerLabelClass}>{t("users.vipRanking")}</div>
-  
+
                 <div className="mt-3 flex items-center gap-2">
                   <CustomSelect
                     value={
@@ -2264,13 +2288,13 @@ export default function Users() {
                     disabled={busyId === actionsModal.user._id}
                     className="w-36"
                   />
-  
+
                   <button
                     disabled={busyId === actionsModal.user._id}
                     onClick={async () => {
                       const id = actionsModal.user._id;
                       await saveUserVipRank(id);
-  
+
                       setActionsModal((prev) =>
                         prev.user
                           ? {
@@ -2278,11 +2302,11 @@ export default function Users() {
                               user: {
                                 ...prev.user,
                                 vipRank: Number(
-                                  vipEdit[id] ?? prev.user.vipRank ?? 1
+                                  vipEdit[id] ?? prev.user.vipRank ?? 1,
                                 ),
                               },
                             }
-                          : prev
+                          : prev,
                       );
                     }}
                     className={`rounded-xl border px-3 py-2 text-xs disabled:opacity-50 ${
@@ -2295,12 +2319,12 @@ export default function Users() {
                   </button>
                 </div>
               </div>
-  
+
               <div className={drawerSectionClass}>
                 <div className={drawerLabelClass}>
                   {t("users.withdrawalPin")}
                 </div>
-  
+
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <div className={pillNeutralClass}>
                     {t("users.locked")}:{" "}
@@ -2314,7 +2338,7 @@ export default function Users() {
                         : t("users.no")}
                     </span>
                   </div>
-  
+
                   <div className={pillNeutralClass}>
                     {t("users.attemptsLeft")}:{" "}
                     <span
@@ -2326,12 +2350,12 @@ export default function Users() {
                         0,
                         3 -
                           Number(
-                            actionsModal.user.withdrawPinFailedAttempts || 0
-                          )
+                            actionsModal.user.withdrawPinFailedAttempts || 0,
+                          ),
                       )}
                     </span>
                   </div>
-  
+
                   <div className={pillNeutralClass}>
                     {t("users.failed")}:{" "}
                     {Number(actionsModal.user.withdrawPinFailedAttempts || 0)}
@@ -2339,19 +2363,19 @@ export default function Users() {
                 </div>
               </div>
             </div>
-  
+
             <div className={drawerSectionClass}>
               <div className={drawerLabelClass}>
                 {t("users.accountActions")}
               </div>
-  
+
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
                     setActionsModal({ open: false, user: null });
-  
+
                     setWithdrawPinModal({
                       open: true,
                       userId: u._id,
@@ -2368,13 +2392,13 @@ export default function Users() {
                     {t("users.resetAttemptsDesc")}
                   </div>
                 </button>
-  
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
                     setActionsModal({ open: false, user: null });
-  
+
                     setPasswordModal({
                       open: true,
                       userId: u._id,
@@ -2391,13 +2415,13 @@ export default function Users() {
                     {t("users.resetPasswordDesc")}
                   </div>
                 </button>
-  
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
                     setActionsModal({ open: false, user: null });
-  
+
                     setPhoneModal({
                       open: true,
                       userId: u._id,
@@ -2419,10 +2443,11 @@ export default function Users() {
                   disabled={busyId === actionsModal.user._id}
                   onClick={async () => {
                     const u = actionsModal.user;
-                    const nextRole = u.role === "super_agent" ? "user" : "super_agent";
-                
+                    const nextRole =
+                      u.role === "super_agent" ? "user" : "super_agent";
+
                     setActionsModal({ open: false, user: null });
-                
+
                     await changeRole(u._id, nextRole);
                   }}
                   className={
@@ -2431,8 +2456,8 @@ export default function Users() {
                         ? "rounded-2xl border border-orange-500/25 bg-orange-500/10 px-4 py-3 text-left text-xs text-orange-200 hover:bg-orange-500/15 disabled:opacity-50"
                         : "rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-left text-xs text-orange-700 hover:bg-orange-100 disabled:opacity-50"
                       : theme === "dark"
-                      ? "rounded-2xl border border-purple-500/25 bg-purple-500/10 px-4 py-3 text-left text-xs text-purple-200 hover:bg-purple-500/15 disabled:opacity-50"
-                      : "rounded-2xl border border-purple-200 bg-purple-50 px-4 py-3 text-left text-xs text-purple-700 hover:bg-purple-100 disabled:opacity-50"
+                        ? "rounded-2xl border border-purple-500/25 bg-purple-500/10 px-4 py-3 text-left text-xs text-purple-200 hover:bg-purple-500/15 disabled:opacity-50"
+                        : "rounded-2xl border border-purple-200 bg-purple-50 px-4 py-3 text-left text-xs text-purple-700 hover:bg-purple-100 disabled:opacity-50"
                   }
                 >
                   <div className="font-semibold">
@@ -2440,14 +2465,14 @@ export default function Users() {
                       ? "Remove Super Agent"
                       : "Make Super Agent"}
                   </div>
-                
+
                   <div className="mt-1 text-[11px] opacity-70">
                     {actionsModal.user.role === "super_agent"
                       ? "Change this user back to normal agent access."
                       : "Allow this user to view all non-hidden platform users."}
                   </div>
                 </button>
-  
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={async () => {
@@ -2455,7 +2480,7 @@ export default function Users() {
                     setActionsModal({ open: false, user: null });
                     await changeRole(
                       u._id,
-                      u.role === "admin" ? "user" : "admin"
+                      u.role === "admin" ? "user" : "admin",
                     );
                   }}
                   className={drawerNeutralButtonClass}
@@ -2471,12 +2496,12 @@ export default function Users() {
                 </button>
               </div>
             </div>
-  
+
             <div className={drawerSectionClass}>
               <div className={drawerLabelClass}>
                 {t("users.growthCampaigns")}
               </div>
-  
+
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <button
                   disabled={busyId === actionsModal.user._id}
@@ -2485,10 +2510,10 @@ export default function Users() {
                     setActionsModal({ open: false, user: null });
                     navigate(
                       `/admin/orders/bonus?uid=${encodeURIComponent(
-                        u.uid
+                        u.uid,
                       )}&currentOrder=${encodeURIComponent(
-                        Number(u.ordersCompleted || 0)
-                      )}`
+                        Number(u.ordersCompleted || 0),
+                      )}`,
                     );
                   }}
                   className={`${actionPlainClass} disabled:opacity-50`}
@@ -2498,7 +2523,7 @@ export default function Users() {
                     {t("users.bonusOrderDesc")}
                   </div>
                 </button>
-  
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
@@ -2506,10 +2531,10 @@ export default function Users() {
                     setActionsModal({ open: false, user: null });
                     navigate(
                       `/admin/lucky-draw?uid=${encodeURIComponent(
-                        u.uid
+                        u.uid,
                       )}&currentOrder=${encodeURIComponent(
-                        Number(u.ordersCompleted || 0)
-                      )}`
+                        Number(u.ordersCompleted || 0),
+                      )}`,
                     );
                   }}
                   className={`${actionPlainClass} disabled:opacity-50`}
@@ -2519,14 +2544,14 @@ export default function Users() {
                     {t("users.luckyDrawDesc")}
                   </div>
                 </button>
-  
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
                     setActionsModal({ open: false, user: null });
                     navigate(
-                      `/admin/bonus-credit?userId=${u._id}&uid=${u.uid || ""}`
+                      `/admin/bonus-credit?userId=${u._id}&uid=${u.uid || ""}`,
                     );
                   }}
                   className={`${actionPlainClass} disabled:opacity-50`}
@@ -2538,10 +2563,10 @@ export default function Users() {
                 </button>
               </div>
             </div>
-  
+
             <div className={drawerSectionClass}>
               <div className={drawerLabelClass}>{t("users.riskControls")}</div>
-  
+
               <div className="mt-3 grid grid-cols-1 gap-3">
                 <div
                   className={
@@ -2559,7 +2584,7 @@ export default function Users() {
                         {t("users.creditScoreDesc")}
                       </div>
                     </div>
-  
+
                     <div
                       className={
                         Number(actionsModal.user.creditScore ?? 100) < 95
@@ -2567,8 +2592,8 @@ export default function Users() {
                             ? "rounded-full border border-red-400/30 bg-red-500/15 px-2.5 py-1 text-[10px] font-semibold text-red-200"
                             : "rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-[10px] font-semibold text-red-700"
                           : theme === "dark"
-                          ? "rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold text-emerald-200"
-                          : "rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700"
+                            ? "rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold text-emerald-200"
+                            : "rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700"
                       }
                     >
                       {Number(actionsModal.user.creditScore ?? 100) < 95
@@ -2576,7 +2601,7 @@ export default function Users() {
                         : t("users.ok")}
                     </div>
                   </div>
-  
+
                   <div className="mt-3 flex items-center gap-2">
                     <input
                       type="number"
@@ -2600,7 +2625,7 @@ export default function Users() {
                       }
                       placeholder="100"
                     />
-  
+
                     <button
                       disabled={busyId === actionsModal.user._id}
                       onClick={() => saveUserCreditScore(actionsModal.user._id)}
@@ -2616,17 +2641,17 @@ export default function Users() {
                     </button>
                   </div>
                 </div>
-  
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
-  
+
                     if (u.withdrawalBlocked) {
                       toggleWithdrawalBlock(u);
                       return;
                     }
-  
+
                     setActionsModal({ open: false, user: null });
                     setWithdrawalBlockModal({
                       open: true,
@@ -2649,15 +2674,15 @@ export default function Users() {
                       : t("users.freezeWithdrawalDesc")}
                   </div>
                 </button>
-  
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
                     const banned = Boolean(u.isBanned);
-  
+
                     setActionsModal({ open: false, user: null });
-  
+
                     setBanModal({
                       open: true,
                       userId: u._id,
@@ -2679,13 +2704,13 @@ export default function Users() {
                       : t("users.blockUserLogin")}
                   </div>
                 </button>
-  
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
                     setActionsModal({ open: false, user: null });
-  
+
                     setDeleteModal({
                       open: true,
                       userId: u._id,
@@ -2701,7 +2726,7 @@ export default function Users() {
                 </button>
               </div>
             </div>
-  
+
             <button
               onClick={() => {
                 setActionsModal({ open: false, user: null });
@@ -2723,7 +2748,7 @@ export default function Users() {
           </div>
         ) : null}
       </Drawer>
-  
+
       <Modal
         open={banModal.open}
         title={banModal.isBanned ? t("users.banUser") : t("users.unbanUser")}
@@ -2761,7 +2786,7 @@ export default function Users() {
             >
               {t("users.cancel")}
             </button>
-  
+
             <button
               disabled={busyId === banModal.userId}
               onClick={submitBan}
@@ -2772,15 +2797,15 @@ export default function Users() {
                     ? "border-red-500/25 bg-red-500/15 text-red-200 hover:bg-red-500/20"
                     : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
                   : theme === "dark"
-                  ? "border-emerald-500/25 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/20"
-                  : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                    ? "border-emerald-500/25 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/20"
+                    : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
               )}
             >
               {busyId === banModal.userId
                 ? t("users.saving")
                 : banModal.isBanned
-                ? t("users.confirmBan")
-                : t("users.confirmUnban")}
+                  ? t("users.confirmBan")
+                  : t("users.confirmUnban")}
             </button>
           </div>
         }
@@ -2807,7 +2832,7 @@ export default function Users() {
               {t("users.unbanWarning")}
             </div>
           )}
-  
+
           {banModal.isBanned ? (
             <div
               className={
@@ -2825,7 +2850,7 @@ export default function Users() {
               >
                 {t("users.reasonOptional")}
               </div>
-  
+
               <input
                 value={banModal.reason}
                 onChange={(e) =>
@@ -2842,7 +2867,7 @@ export default function Users() {
           ) : null}
         </div>
       </Modal>
-  
+
       <Modal
         open={createUserModal.open}
         title={t("users.createUserTitle")}
@@ -2874,7 +2899,7 @@ export default function Users() {
             >
               {t("users.cancel")}
             </button>
-  
+
             <button
               disabled={busyId === "create-user"}
               onClick={submitCreateUser}
@@ -2908,7 +2933,7 @@ export default function Users() {
             >
               {t("users.phoneNumber")}
             </div>
-  
+
             <input
               value={createUserModal.phoneNumber}
               onChange={(e) =>
@@ -2925,7 +2950,7 @@ export default function Users() {
               }
             />
           </div>
-  
+
           <div
             className={
               theme === "dark"
@@ -2942,7 +2967,7 @@ export default function Users() {
             >
               {t("users.password")}
             </div>
-  
+
             <input
               type="password"
               value={createUserModal.password}
@@ -2960,7 +2985,7 @@ export default function Users() {
               }
             />
           </div>
-  
+
           <div
             className={
               theme === "dark"
@@ -2977,7 +3002,7 @@ export default function Users() {
             >
               {t("users.role")}
             </div>
-  
+
             <select
               value={createUserModal.role}
               onChange={(e) =>
@@ -2995,7 +3020,7 @@ export default function Users() {
           </div>
         </div>
       </Modal>
-  
+
       <Modal
         open={passwordModal.open}
         title={t("users.resetPassword")}
@@ -3031,7 +3056,7 @@ export default function Users() {
             >
               {t("users.cancel")}
             </button>
-  
+
             <button
               disabled={busyId === passwordModal.userId}
               onClick={submitResetPassword}
@@ -3065,7 +3090,7 @@ export default function Users() {
             >
               {t("users.newPassword")}
             </div>
-  
+
             <input
               value={passwordModal.newPassword}
               onChange={(e) =>
@@ -3082,7 +3107,7 @@ export default function Users() {
               }
               type="text"
             />
-  
+
             <div
               className={
                 theme === "dark"
@@ -3095,7 +3120,7 @@ export default function Users() {
           </div>
         </div>
       </Modal>
-  
+
       <Modal
         open={withdrawPinModal.open}
         title={t("users.resetWithdrawalPin")}
@@ -3131,7 +3156,7 @@ export default function Users() {
             >
               {t("users.cancel")}
             </button>
-  
+
             <button
               disabled={busyId === withdrawPinModal.userId}
               onClick={submitResetWithdrawPin}
@@ -3165,7 +3190,7 @@ export default function Users() {
             >
               {t("users.newPin")}
             </div>
-  
+
             <input
               value={withdrawPinModal.newPin}
               onChange={(e) =>
@@ -3183,7 +3208,7 @@ export default function Users() {
               type="text"
               inputMode="numeric"
             />
-  
+
             <div
               className={
                 theme === "dark"
@@ -3196,14 +3221,12 @@ export default function Users() {
           </div>
         </div>
       </Modal>
-  
+
       <Modal
         open={phoneModal.open}
         title={t("users.resetPhoneNumber")}
         subtitle={
-          phoneModal.userId
-            ? `${t("users.old")}: ${phoneModal.oldPhone}`
-            : ""
+          phoneModal.userId ? `${t("users.old")}: ${phoneModal.oldPhone}` : ""
         }
         onClose={() =>
           setPhoneModal({
@@ -3232,7 +3255,7 @@ export default function Users() {
             >
               {t("users.cancel")}
             </button>
-  
+
             <button
               disabled={busyId === phoneModal.userId}
               onClick={submitResetPhone}
@@ -3266,7 +3289,7 @@ export default function Users() {
             >
               {t("users.newPhoneNumber")}
             </div>
-  
+
             <input
               value={phoneModal.newPhone}
               onChange={(e) =>
@@ -3280,7 +3303,7 @@ export default function Users() {
               }
               type="text"
             />
-  
+
             <div
               className={
                 theme === "dark"
@@ -3293,7 +3316,7 @@ export default function Users() {
           </div>
         </div>
       </Modal>
-  
+
       <Modal
         open={deleteModal.open}
         title={t("users.deleteUser")}
@@ -3327,7 +3350,7 @@ export default function Users() {
             >
               {t("users.cancel")}
             </button>
-  
+
             <button
               disabled={busyId === deleteModal.userId}
               onClick={submitDelete}
@@ -3354,10 +3377,12 @@ export default function Users() {
           >
             {t("users.deleteWarning")}
           </div>
-  
+
           <div
             className={
-              theme === "dark" ? "text-xs text-white/60" : "text-xs text-gray-600"
+              theme === "dark"
+                ? "text-xs text-white/60"
+                : "text-xs text-gray-600"
             }
           >
             {t("users.deleteInsteadPrefix")}{" "}
