@@ -19,6 +19,7 @@ import {
   X,
   MonitorSmartphone,
   Menu,
+  Mail,
 } from "lucide-react";
 
 const API_BASE_URL = "https://closed-deirdre-jayjay122-a04beb79.koyeb.app";
@@ -42,6 +43,7 @@ const TAB_LABEL_KEYS = {
   "/admin/settings": "settings",
   "/admin/content": "content",
   "/admin/events": "events",
+  "/admin/guest-emails": "guestEmails",
 };
 
 function isTrackableAdminPath(pathname) {
@@ -80,7 +82,7 @@ function saveRecentTabs(tabs) {
   try {
     localStorage.setItem(
       RECENT_TABS_STORAGE_KEY,
-      JSON.stringify(tabs.map((tab) => ({ path: tab.path })))
+      JSON.stringify(tabs.map((tab) => ({ path: tab.path }))),
     );
   } catch {
     // ignore storage errors
@@ -202,7 +204,7 @@ export default function Shell({ title, children }) {
       if (hasLoadedNotificationsRef.current) {
         const previousUnreadIds = lastUnreadIdsRef.current;
         const hasBrandNewUnread = newUnreadIds.some(
-          (id) => !previousUnreadIds.includes(id)
+          (id) => !previousUnreadIds.includes(id),
         );
 
         if (hasBrandNewUnread) {
@@ -233,7 +235,7 @@ export default function Shell({ title, children }) {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const data = await res.json();
@@ -244,8 +246,8 @@ export default function Shell({ title, children }) {
 
       setNotifications((prev) =>
         prev.map((item) =>
-          item._id === notificationId ? { ...item, isRead: true } : item
-        )
+          item._id === notificationId ? { ...item, isRead: true } : item,
+        ),
       );
     } catch (err) {
       console.error("Failed to mark notification as read:", err);
@@ -264,7 +266,7 @@ export default function Shell({ title, children }) {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const data = await res.json();
@@ -274,7 +276,7 @@ export default function Shell({ title, children }) {
       }
 
       setNotifications((prev) =>
-        prev.map((item) => ({ ...item, isRead: true }))
+        prev.map((item) => ({ ...item, isRead: true })),
       );
     } catch (err) {
       console.error("Failed to mark all notifications as read:", err);
@@ -320,13 +322,13 @@ export default function Shell({ title, children }) {
 
     if (item?.type === "DUPLICATE_WITHDRAWAL_ADDRESS") {
       return `${t("notifications.user")} ${currentUser} ${t(
-        "notifications.matched"
+        "notifications.matched",
       )} ${relatedUser}${item?.cryptoType ? ` · ${item.cryptoType}` : ""}`;
     }
 
     if (item?.type === "DUPLICATE_REGISTER_IP") {
       return `${t("notifications.user")} ${currentUser} ${t(
-        "notifications.matched"
+        "notifications.matched",
       )} ${relatedUser}${item?.ip ? ` · ${item.ip}` : ""}`;
     }
 
@@ -360,8 +362,7 @@ export default function Shell({ title, children }) {
             ? prev[closingIndex + 1]
             : null;
 
-        const fallbackPath =
-          leftTab?.path || rightTab?.path || "/admin/users";
+        const fallbackPath = leftTab?.path || rightTab?.path || "/admin/users";
 
         navigate(fallbackPath);
       }
@@ -497,6 +498,15 @@ export default function Shell({ title, children }) {
                 onNavigate={() => setMobileMenuOpen(false)}
               >
                 {t("nav.kyc")}
+              </SideLink>
+
+              <SideLink
+                theme={theme}
+                to="/admin/guest-emails"
+                icon={<Mail className="h-4 w-4 shrink-0" />}
+                onNavigate={() => setMobileMenuOpen(false)}
+              >
+                Guest Emails
               </SideLink>
 
               <SideLink
@@ -931,8 +941,8 @@ export default function Shell({ title, children }) {
                             ? "border-white/10 bg-[#101828] text-white"
                             : "border-[#E2D8C8] bg-white text-[#111827]"
                           : isDark
-                          ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
-                          : "border-[#E8E1D6] bg-[#F3EBDD] text-[#6B7280] hover:bg-white hover:text-[#111827]"
+                            ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+                            : "border-[#E8E1D6] bg-[#F3EBDD] text-[#6B7280] hover:bg-white hover:text-[#111827]"
                       } ${isDragging ? "opacity-50" : ""} ${
                         isDragOver
                           ? isDark
@@ -1002,8 +1012,8 @@ function SideLink({ to, icon, children, theme, onNavigate }) {
               ? "bg-white/10 text-white"
               : "text-white/70 hover:bg-white/10 hover:text-white"
             : isActive
-            ? "bg-white text-[#111827] shadow-sm"
-            : "text-[#4B5563] hover:bg-white/60 hover:text-[#111827]"
+              ? "bg-white text-[#111827] shadow-sm"
+              : "text-[#4B5563] hover:bg-white/60 hover:text-[#111827]"
         }`
       }
     >

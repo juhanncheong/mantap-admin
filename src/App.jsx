@@ -19,6 +19,7 @@ import AdminPopupsPage from "./pages/AdminPopupsPage";
 import AdminOrderList from "./pages/AdminOrderList";
 import { LanguageProvider } from "./context/LanguageContext";
 import AdminKycPage from "./pages/AdminKyc";
+import AdminGuestEmails from "./pages/AdminGuestEmails";
 
 export default function App() {
   return (
@@ -27,17 +28,32 @@ export default function App() {
         <LanguageProvider>
           <Routes>
             <Route path="/" element={<Navigate to="/admin/login" replace />} />
-      
+
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<Navigate to="/admin/users" replace />} />
-            <Route path="/admin/invitation-codes" element={<InvitationCodes />} />
+            <Route
+              path="/admin/dashboard"
+              element={<Navigate to="/admin/users" replace />}
+            />
+            <Route
+              path="/admin/invitation-codes"
+              element={<InvitationCodes />}
+            />
             <Route path="/admin/users" element={<UsersPage />} />
             <Route path="/admin/trial-bonus" element={<TrialBonus />} />
             <Route path="/admin/orders/pool" element={<OrdersPoolPage />} />
             <Route path="/admin/orders/bonus" element={<BonusTriggersPage />} />
-            <Route path="/admin/withdrawals" element={<AdminWithdrawalsPage />} />
-            <Route path="/admin/deposits" element={<Navigate to="/admin/users" replace />} />
-            <Route path="/admin/signin-rewards" element={<AdminSigninRewardsPage />} />
+            <Route
+              path="/admin/withdrawals"
+              element={<AdminWithdrawalsPage />}
+            />
+            <Route
+              path="/admin/deposits"
+              element={<Navigate to="/admin/users" replace />}
+            />
+            <Route
+              path="/admin/signin-rewards"
+              element={<AdminSigninRewardsPage />}
+            />
             <Route path="/admin/settings" element={<SettingsPage />} />
             <Route path="/admin/content" element={<Content />} />
             <Route path="/admin/events" element={<Events />} />
@@ -46,10 +62,11 @@ export default function App() {
             <Route path="/admin/popups" element={<AdminPopupsPage />} />
             <Route path="/admin/orders/list" element={<AdminOrderList />} />
             <Route path="/admin/kyc" element={<AdminKycPage />} />
-      
+            <Route path="/admin/guest-emails" element={<AdminGuestEmails />} />
+
             <Route path="*" element={<Navigate to="/admin/login" replace />} />
           </Routes>
-      
+
           <ToastContainer position="top-right" autoClose={2500} />
         </LanguageProvider>
       </ThemeProvider>
