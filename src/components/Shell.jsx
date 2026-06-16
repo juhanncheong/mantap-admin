@@ -506,7 +506,7 @@ export default function Shell({ title, children }) {
                 icon={<Mail className="h-4 w-4 shrink-0" />}
                 onNavigate={() => setMobileMenuOpen(false)}
               >
-                Guest Emails
+                {t("nav.guestEmails")}
               </SideLink>
 
               <SideLink
