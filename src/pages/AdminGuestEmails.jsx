@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Shell from "../components/Shell";
 import { toast } from "react-toastify";
 import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
 import {
   Mail,
   Send,
@@ -146,6 +147,7 @@ function Modal({ open, title, subtitle, children, footer, onClose }) {
                   <div className="truncate text-lg font-bold tracking-tight sm:text-xl">
                     {title}
                   </div>
+
                   {subtitle ? (
                     <div
                       className={classNames(
@@ -198,6 +200,7 @@ function Modal({ open, title, subtitle, children, footer, onClose }) {
 
 export default function AdminGuestEmails() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
 
   const cached = loadEmailCache();
@@ -288,6 +291,7 @@ export default function AdminGuestEmails() {
       if (!x.createdAt) return false;
       const d = new Date(x.createdAt);
       const now = new Date();
+
       return (
         d.getFullYear() === now.getFullYear() &&
         d.getMonth() === now.getMonth() &&
@@ -311,7 +315,7 @@ export default function AdminGuestEmails() {
     const auth = getAuthHeaders();
 
     if (!auth) {
-      throw new Error("Please login again.");
+      throw new Error(t("guestEmails.errors.loginAgain"));
     }
 
     const res = await fetch(url, {
@@ -326,11 +330,14 @@ export default function AdminGuestEmails() {
     try {
       data = await res.json();
     } catch {
-      throw new Error("Server returned non-JSON response.");
+      throw new Error(t("guestEmails.errors.nonJson"));
     }
 
     if (!res.ok || data?.ok === false) {
-      throw new Error(data?.message || `Request failed (${res.status})`);
+      throw new Error(
+        data?.message ||
+          t("guestEmails.errors.requestFailed", { status: res.status }),
+      );
     }
 
     return data;
@@ -361,7 +368,7 @@ export default function AdminGuestEmails() {
       }
 
       if (!String(e.message || "").includes("404")) {
-        toast.error(e.message || "Failed to load email history");
+        toast.error(e.message || t("guestEmails.errors.loadFailed"));
       }
     } finally {
       setLoading(false);
@@ -376,32 +383,32 @@ export default function AdminGuestEmails() {
     const description = String(sendModal.description || "").trim();
 
     if (!email) {
-      toast.error("Guest email is required");
+      toast.error(t("guestEmails.errors.emailRequired"));
       return;
     }
 
     if (!isValidEmail(email)) {
-      toast.error("Please enter a valid email address");
+      toast.error(t("guestEmails.errors.invalidEmail"));
       return;
     }
 
     if (!title) {
-      toast.error("Title is required");
+      toast.error(t("guestEmails.errors.titleRequired"));
       return;
     }
 
     if (title.length > 150) {
-      toast.error("Title must be 150 characters or less");
+      toast.error(t("guestEmails.errors.titleTooLong"));
       return;
     }
 
     if (!description) {
-      toast.error("Description is required");
+      toast.error(t("guestEmails.errors.descriptionRequired"));
       return;
     }
 
     if (description.length > 5000) {
-      toast.error("Description must be 5000 characters or less");
+      toast.error(t("guestEmails.errors.descriptionTooLong"));
       return;
     }
 
@@ -434,15 +441,17 @@ export default function AdminGuestEmails() {
 
       setRows((prev) => {
         const next = [newRow, ...prev];
+
         saveEmailCache({
           rows: next,
           q,
           savedAt: Date.now(),
         });
+
         return next;
       });
 
-      toast.success(data?.message || "Email sent successfully");
+      toast.success(data?.message || t("guestEmails.success.sent"));
 
       setSendModal({
         open: false,
@@ -459,21 +468,23 @@ export default function AdminGuestEmails() {
         title,
         description,
         status: "failed",
-        errorMessage: e.message || "Failed to send email",
+        errorMessage: e.message || t("guestEmails.errors.sendFailed"),
         createdAt: new Date().toISOString(),
       };
 
       setRows((prev) => {
         const next = [failedRow, ...prev];
+
         saveEmailCache({
           rows: next,
           q,
           savedAt: Date.now(),
         });
+
         return next;
       });
 
-      toast.error(e.message || "Failed to send email");
+      toast.error(e.message || t("guestEmails.errors.sendFailed"));
     } finally {
       setSending(false);
     }
@@ -500,7 +511,7 @@ export default function AdminGuestEmails() {
       return (
         <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[11px] font-bold text-red-500">
           <AlertCircle className="h-3.5 w-3.5" />
-          Failed
+          {t("guestEmails.status.failed")}
         </span>
       );
     }
@@ -509,7 +520,7 @@ export default function AdminGuestEmails() {
       return (
         <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-500">
           <Clock className="h-3.5 w-3.5" />
-          Pending
+          {t("guestEmails.status.pending")}
         </span>
       );
     }
@@ -517,21 +528,12 @@ export default function AdminGuestEmails() {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-500">
         <CheckCircle2 className="h-3.5 w-3.5" />
-        Sent
+        {t("guestEmails.status.sent")}
       </span>
     );
   }
 
-  function StatCard({ icon, label, value, tone }) {
-    const toneClass =
-      tone === "blue"
-        ? "from-blue-500/15 to-indigo-500/10 text-blue-500"
-        : tone === "green"
-          ? "from-emerald-500/15 to-teal-500/10 text-emerald-500"
-          : tone === "red"
-            ? "from-red-500/15 to-rose-500/10 text-red-500"
-            : "from-violet-500/15 to-fuchsia-500/10 text-violet-500";
-
+  function StatCard({ icon, label, value }) {
     return (
       <div
         className={classNames(
@@ -541,12 +543,7 @@ export default function AdminGuestEmails() {
             : "border-gray-200 bg-white shadow-sm",
         )}
       >
-        <div
-          className={classNames(
-            "absolute inset-0 bg-gradient-to-br opacity-80",
-            toneClass,
-          )}
-        />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/5 opacity-80" />
 
         <div className="relative flex items-center justify-between gap-4">
           <div>
@@ -572,51 +569,49 @@ export default function AdminGuestEmails() {
   }
 
   return (
-    <Shell title="Guest Emails">
-      <div className="space-y-6">
-        <div
-          className={classNames(
-            "relative overflow-hidden rounded-[32px] border p-5 sm:p-6",
-            isDark
-              ? "border-white/10 bg-[#071120]"
-              : "border-gray-200 bg-white shadow-sm",
-          )}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-violet-500/10 to-emerald-500/10" />
-          <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-blue-500/20 blur-3xl" />
-          <div className="absolute -bottom-28 left-1/3 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl" />
+    <Shell title={t("guestEmails.title")}>
+      <div className="space-y-5">
+        <div className="grid gap-4 md:grid-cols-4">
+          <StatCard
+            label={t("guestEmails.stats.totalEmails")}
+            value={stats.total}
+            icon={<Inbox className="h-5 w-5 text-blue-500" />}
+          />
 
-          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <StatCard
+            label={t("guestEmails.stats.sent")}
+            value={stats.sent}
+            icon={<CheckCircle2 className="h-5 w-5 text-emerald-500" />}
+          />
+
+          <StatCard
+            label={t("guestEmails.stats.failed")}
+            value={stats.failed}
+            icon={<AlertCircle className="h-5 w-5 text-red-500" />}
+          />
+
+          <StatCard
+            label={t("guestEmails.stats.today")}
+            value={stats.today}
+            icon={<Clock className="h-5 w-5 text-violet-500" />}
+          />
+        </div>
+
+        <div className={cardClass}>
+          <div className="flex flex-col gap-4 p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
             <div className="min-w-0">
-              <div
-                className={classNames(
-                  "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold",
-                  isDark
-                    ? "border-white/10 bg-white/5 text-blue-200"
-                    : "border-blue-100 bg-blue-50 text-blue-700",
-                )}
-              >
-                <Mail className="h-3.5 w-3.5" />
-                Manual Brevo Template Sender
+              <div className={classNames("text-base font-bold", strongText)}>
+                {t("guestEmails.historyTitle")}
               </div>
-
-              <h1
-                className={classNames(
-                  "mt-4 text-2xl font-black tracking-tight sm:text-3xl",
-                  strongText,
-                )}
-              >
-                Guest Email Center
-              </h1>
-
-              <p className={classNames("mt-2 max-w-2xl text-sm", softText)}>
-                Manually send polished template emails to guest users with a
-                custom title and description. Every send appears in the email
-                activity table below.
-              </p>
+              <div className={classNames("mt-1 text-xs", mutedText)}>
+                {t("guestEmails.showingRecords", {
+                  shown: filteredRows.length,
+                  total: rows.length,
+                })}
+              </div>
             </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center xl:w-auto">
               <button
                 type="button"
                 onClick={() => loadEmails()}
@@ -626,7 +621,7 @@ export default function AdminGuestEmails() {
                 <RefreshCw
                   className={classNames("h-4 w-4", loading && "animate-spin")}
                 />
-                Refresh
+                {t("guestEmails.refresh")}
               </button>
 
               <button
@@ -642,63 +637,23 @@ export default function AdminGuestEmails() {
                 className={primaryButtonClass}
               >
                 <Plus className="h-4 w-4" />
-                Send Email
+                {t("guestEmails.sendEmail")}
               </button>
-            </div>
-          </div>
-        </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
-          <StatCard
-            label="Total Emails"
-            value={stats.total}
-            tone="blue"
-            icon={<Inbox className="h-5 w-5 text-blue-500" />}
-          />
-          <StatCard
-            label="Sent"
-            value={stats.sent}
-            tone="green"
-            icon={<CheckCircle2 className="h-5 w-5 text-emerald-500" />}
-          />
-          <StatCard
-            label="Failed"
-            value={stats.failed}
-            tone="red"
-            icon={<AlertCircle className="h-5 w-5 text-red-500" />}
-          />
-          <StatCard
-            label="Today"
-            value={stats.today}
-            tone="violet"
-            icon={<Clock className="h-5 w-5 text-violet-500" />}
-          />
-        </div>
-
-        <div className={cardClass}>
-          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-            <div>
-              <div className={classNames("text-base font-bold", strongText)}>
-                Sent Email History
+              <div className="relative w-full sm:min-w-[320px] xl:w-[380px]">
+                <Search
+                  className={classNames(
+                    "pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2",
+                    mutedText,
+                  )}
+                />
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder={t("guestEmails.searchPlaceholder")}
+                  className={classNames(inputClass, "pl-11")}
+                />
               </div>
-              <div className={classNames("mt-1 text-xs", mutedText)}>
-                Showing {filteredRows.length} of {rows.length} records
-              </div>
-            </div>
-
-            <div className="relative w-full sm:max-w-sm">
-              <Search
-                className={classNames(
-                  "pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2",
-                  mutedText,
-                )}
-              />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search email, title, description..."
-                className={classNames(inputClass, "pl-11")}
-              />
             </div>
           </div>
 
@@ -707,13 +662,27 @@ export default function AdminGuestEmails() {
               <table className="min-w-[1100px] text-left text-sm">
                 <thead className={tableHeadClass}>
                   <tr>
-                    <th className="px-5 py-4">Status</th>
-                    <th className="px-5 py-4">Guest Email</th>
-                    <th className="px-5 py-4">Title</th>
-                    <th className="px-5 py-4">Description</th>
-                    <th className="px-5 py-4">Brevo ID</th>
-                    <th className="px-5 py-4">Sent At</th>
-                    <th className="px-5 py-4 text-right">Action</th>
+                    <th className="px-5 py-4">
+                      {t("guestEmails.table.status")}
+                    </th>
+                    <th className="px-5 py-4">
+                      {t("guestEmails.table.guestEmail")}
+                    </th>
+                    <th className="px-5 py-4">
+                      {t("guestEmails.table.emailTitle")}
+                    </th>
+                    <th className="px-5 py-4">
+                      {t("guestEmails.table.description")}
+                    </th>
+                    <th className="px-5 py-4">
+                      {t("guestEmails.table.brevoId")}
+                    </th>
+                    <th className="px-5 py-4">
+                      {t("guestEmails.table.sentAt")}
+                    </th>
+                    <th className="px-5 py-4 text-right">
+                      {t("guestEmails.table.action")}
+                    </th>
                   </tr>
                 </thead>
 
@@ -761,11 +730,11 @@ export default function AdminGuestEmails() {
                             strongText,
                           )}
                         >
-                          No email records found
+                          {t("guestEmails.emptyTitle")}
                         </div>
 
                         <div className={classNames("mt-1 text-sm", mutedText)}>
-                          Click Send Email to create your first guest email.
+                          {t("guestEmails.emptySubtitle")}
                         </div>
                       </td>
                     </tr>
@@ -809,7 +778,7 @@ export default function AdminGuestEmails() {
                                   mutedText,
                                 )}
                               >
-                                Guest recipient
+                                {t("guestEmails.guestRecipient")}
                               </div>
                             </div>
                           </div>
@@ -871,7 +840,7 @@ export default function AdminGuestEmails() {
                             className={buttonClass}
                           >
                             <Eye className="h-4 w-4" />
-                            View
+                            {t("guestEmails.view")}
                           </button>
                         </td>
                       </tr>
@@ -886,10 +855,11 @@ export default function AdminGuestEmails() {
 
       <Modal
         open={sendModal.open}
-        title="Send Guest Email"
-        subtitle="Create a polished Brevo template email with a custom title and message."
+        title={t("guestEmails.modal.sendTitle")}
+        subtitle={t("guestEmails.modal.sendSubtitle")}
         onClose={() => {
           if (sending) return;
+
           setSendModal({
             open: false,
             email: "",
@@ -900,7 +870,7 @@ export default function AdminGuestEmails() {
         footer={
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className={classNames("text-xs", mutedText)}>
-              This will send immediately through your Brevo template.
+              {t("guestEmails.modal.footerHint")}
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -917,7 +887,7 @@ export default function AdminGuestEmails() {
                 }
                 className={buttonClass}
               >
-                Cancel
+                {t("guestEmails.cancel")}
               </button>
 
               <button
@@ -931,7 +901,7 @@ export default function AdminGuestEmails() {
                 ) : (
                   <Send className="h-4 w-4" />
                 )}
-                {sending ? "Sending..." : "Send Now"}
+                {sending ? t("guestEmails.sending") : t("guestEmails.sendNow")}
               </button>
             </div>
           </div>
@@ -946,8 +916,9 @@ export default function AdminGuestEmails() {
                   strongText,
                 )}
               >
-                Guest Email
+                {t("guestEmails.form.guestEmail")}
               </label>
+
               <input
                 value={sendModal.email}
                 onChange={(e) =>
@@ -956,7 +927,7 @@ export default function AdminGuestEmails() {
                     email: e.target.value,
                   }))
                 }
-                placeholder="guest@example.com"
+                placeholder={t("guestEmails.form.guestEmailPlaceholder")}
                 className={inputClass}
               />
             </div>
@@ -966,8 +937,9 @@ export default function AdminGuestEmails() {
                 <label
                   className={classNames("block text-xs font-bold", strongText)}
                 >
-                  Email Title
+                  {t("guestEmails.form.emailTitle")}
                 </label>
+
                 <span
                   className={classNames(
                     "text-[11px]",
@@ -986,7 +958,7 @@ export default function AdminGuestEmails() {
                     title: e.target.value,
                   }))
                 }
-                placeholder="Example: Welcome to Our Platform"
+                placeholder={t("guestEmails.form.emailTitlePlaceholder")}
                 className={inputClass}
               />
             </div>
@@ -996,8 +968,9 @@ export default function AdminGuestEmails() {
                 <label
                   className={classNames("block text-xs font-bold", strongText)}
                 >
-                  Description
+                  {t("guestEmails.form.description")}
                 </label>
+
                 <span
                   className={classNames(
                     "text-[11px]",
@@ -1018,7 +991,7 @@ export default function AdminGuestEmails() {
                     description: e.target.value,
                   }))
                 }
-                placeholder="Write the message details here..."
+                placeholder={t("guestEmails.form.descriptionPlaceholder")}
                 className={textareaClass}
               />
             </div>
@@ -1041,7 +1014,7 @@ export default function AdminGuestEmails() {
               <div className="flex items-center gap-2">
                 <FileText className={classNames("h-4 w-4", mutedText)} />
                 <div className={classNames("text-xs font-bold", strongText)}>
-                  Live Preview
+                  {t("guestEmails.preview.title")}
                 </div>
               </div>
             </div>
@@ -1064,13 +1037,13 @@ export default function AdminGuestEmails() {
                   )}
                 >
                   <Mail className="h-3.5 w-3.5" />
-                  Brevo Template
+                  {t("guestEmails.preview.badge")}
                 </div>
 
                 <div
                   className={classNames("mt-5 text-lg font-black", strongText)}
                 >
-                  {sendModal.title || "Your email title will appear here"}
+                  {sendModal.title || t("guestEmails.preview.emptyTitle")}
                 </div>
 
                 <div
@@ -1080,7 +1053,7 @@ export default function AdminGuestEmails() {
                   )}
                 >
                   {sendModal.description ||
-                    "Your email description will appear here. This is the content passed into {{ params.description }} inside your Brevo template."}
+                    t("guestEmails.preview.emptyDescription")}
                 </div>
 
                 <div
@@ -1091,7 +1064,8 @@ export default function AdminGuestEmails() {
                       : "border-gray-200 bg-gray-50 text-gray-500",
                   )}
                 >
-                  Recipient: {sendModal.email || "guest@example.com"}
+                  {t("guestEmails.preview.recipient")}:{" "}
+                  {sendModal.email || "guest@example.com"}
                 </div>
               </div>
             </div>
@@ -1101,8 +1075,8 @@ export default function AdminGuestEmails() {
 
       <Modal
         open={previewModal.open}
-        title="Email Details"
-        subtitle="Review the exact title, description, recipient, and delivery status."
+        title={t("guestEmails.details.title")}
+        subtitle={t("guestEmails.details.subtitle")}
         onClose={() =>
           setPreviewModal({
             open: false,
@@ -1121,7 +1095,7 @@ export default function AdminGuestEmails() {
               }
               className={buttonClass}
             >
-              Close
+              {t("guestEmails.close")}
             </button>
           </div>
         }
@@ -1137,7 +1111,9 @@ export default function AdminGuestEmails() {
                     : "border-gray-200 bg-gray-50",
                 )}
               >
-                <div className={classNames("text-xs", mutedText)}>Status</div>
+                <div className={classNames("text-xs", mutedText)}>
+                  {t("guestEmails.details.status")}
+                </div>
                 <div className="mt-2">
                   <StatusPill status={previewModal.row.status} />
                 </div>
@@ -1152,8 +1128,9 @@ export default function AdminGuestEmails() {
                 )}
               >
                 <div className={classNames("text-xs", mutedText)}>
-                  Recipient
+                  {t("guestEmails.details.recipient")}
                 </div>
+
                 <div
                   className={classNames(
                     "mt-2 break-all text-sm font-bold",
@@ -1172,7 +1149,10 @@ export default function AdminGuestEmails() {
                     : "border-gray-200 bg-gray-50",
                 )}
               >
-                <div className={classNames("text-xs", mutedText)}>Sent At</div>
+                <div className={classNames("text-xs", mutedText)}>
+                  {t("guestEmails.details.sentAt")}
+                </div>
+
                 <div
                   className={classNames("mt-2 text-sm font-bold", strongText)}
                 >
@@ -1192,8 +1172,9 @@ export default function AdminGuestEmails() {
               )}
             >
               <div className={classNames("text-xs font-bold", mutedText)}>
-                Email Title
+                {t("guestEmails.details.emailTitle")}
               </div>
+
               <div
                 className={classNames("mt-2 text-lg font-black", strongText)}
               >
@@ -1201,8 +1182,9 @@ export default function AdminGuestEmails() {
               </div>
 
               <div className={classNames("mt-6 text-xs font-bold", mutedText)}>
-                Description
+                {t("guestEmails.details.description")}
               </div>
+
               <div
                 className={classNames(
                   "mt-2 whitespace-pre-wrap text-sm leading-7",
@@ -1215,8 +1197,9 @@ export default function AdminGuestEmails() {
               </div>
 
               <div className={classNames("mt-6 text-xs font-bold", mutedText)}>
-                Brevo Message ID
+                {t("guestEmails.details.brevoMessageId")}
               </div>
+
               <div
                 className={classNames(
                   "mt-2 break-all rounded-2xl border px-4 py-3 text-xs",
