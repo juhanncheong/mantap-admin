@@ -164,9 +164,7 @@ export default function TrialBonus() {
       : "bg-gray-50 text-xs text-gray-500";
 
   const tableBodyClass =
-    theme === "dark"
-      ? "divide-y divide-white/10"
-      : "divide-y divide-gray-200";
+    theme === "dark" ? "divide-y divide-white/10" : "divide-y divide-gray-200";
 
   const topBarClass =
     theme === "dark"
@@ -234,9 +232,8 @@ export default function TrialBonus() {
   });
 
   const [grantSearch, setGrantSearch] = useState("");
-  const [allUsersLoaded, setAllUsersLoaded] = useState(false);
-  const [allUsersLoading, setAllUsersLoading] = useState(false);
-  const [allUsers, setAllUsers] = useState([]);
+  const [grantUsersLoading, setGrantUsersLoading] = useState(false);
+  const [grantUsers, setGrantUsers] = useState([]);
 
   function getAuthHeaders() {
     const token = localStorage.getItem("admin_token");
@@ -298,7 +295,7 @@ export default function TrialBonus() {
       if (cleanQ) params.set("q", cleanQ);
 
       const data = await fetchJSON(
-        `${API_BASE}/api/admin/trial-users?${params.toString()}`
+        `${API_BASE}/api/admin/trial-users?${params.toString()}`,
       );
 
       const list = Array.isArray(data?.rows) ? data.rows : [];
@@ -318,20 +315,33 @@ export default function TrialBonus() {
     }
   }
 
-  async function loadAllUsersForGrant() {
-    if (allUsersLoaded || allUsersLoading) return;
+  async function searchUsersForGrant(term) {
+    const cleanTerm = String(term || "").trim();
 
-    setAllUsersLoading(true);
+    if (cleanTerm.length < 2) {
+      setGrantUsers([]);
+      return;
+    }
+
+    setGrantUsersLoading(true);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users`);
+      const params = new URLSearchParams();
+      params.set("page", "1");
+      params.set("limit", "20");
+      params.set("q", cleanTerm);
+
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users?${params.toString()}`,
+      );
+
       const users = Array.isArray(data?.users) ? data.users : [];
-      setAllUsers(users);
-      setAllUsersLoaded(true);
+      setGrantUsers(users);
     } catch (e) {
+      setGrantUsers([]);
       toast.error(e.message || t("trialBonus.failedLoadUsers"));
     } finally {
-      setAllUsersLoading(false);
+      setGrantUsersLoading(false);
     }
   }
 
@@ -403,9 +413,11 @@ export default function TrialBonus() {
   }, [page, q, pageSize]);
 
   useEffect(() => {
-    if (grantSearch.trim().length >= 2) {
-      loadAllUsersForGrant();
-    }
+    const timer = setTimeout(() => {
+      searchUsersForGrant(grantSearch);
+    }, 400);
+
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grantSearch]);
 
@@ -417,21 +429,6 @@ export default function TrialBonus() {
       to: Math.min(page * pageSize, total),
     };
   }, [page, pageSize, total]);
-
-  const grantFilteredUsers = useMemo(() => {
-    const term = grantSearch.trim().toLowerCase();
-    if (!term || term.length < 2) return [];
-
-    return allUsers
-      .filter((u) => {
-        return (
-          String(u.uid || "").toLowerCase().includes(term) ||
-          String(u.phoneNumber || "").toLowerCase().includes(term) ||
-          String(u._id || "").toLowerCase().includes(term)
-        );
-      })
-      .slice(0, 12);
-  }, [allUsers, grantSearch]);
 
   function getStatus(row) {
     if (!row?.hasTrial) return "None";
@@ -494,7 +491,7 @@ export default function TrialBonus() {
                   </thead>
 
                   <tbody className={tableBodyClass}>
-                    {allUsersLoading ? (
+                    {grantUsersLoading ? (
                       <tr>
                         <td
                           colSpan={4}
@@ -503,7 +500,7 @@ export default function TrialBonus() {
                           {t("trialBonus.loadingUsers")}
                         </td>
                       </tr>
-                    ) : grantFilteredUsers.length === 0 ? (
+                    ) : grantUsers.length === 0 ? (
                       <tr>
                         <td
                           colSpan={4}
@@ -513,7 +510,7 @@ export default function TrialBonus() {
                         </td>
                       </tr>
                     ) : (
-                      grantFilteredUsers.map((u) => {
+                      grantUsers.map((u) => {
                         const isBusy = busyId === u._id;
 
                         return (
@@ -555,7 +552,7 @@ export default function TrialBonus() {
                                   }
                                   className={classNames(
                                     primaryButtonClass,
-                                    "disabled:opacity-50"
+                                    "disabled:opacity-50",
                                   )}
                                 >
                                   {t("trialBonus.grantTrial")}
@@ -636,9 +633,7 @@ export default function TrialBonus() {
                 <tr>
                   <th className="px-4 py-3">UID</th>
                   <th className="px-4 py-3">{t("trialBonus.phone")}</th>
-                  <th className="px-4 py-3">
-                    {t("trialBonus.trialStatus")}
-                  </th>
+                  <th className="px-4 py-3">{t("trialBonus.trialStatus")}</th>
                   <th className="px-4 py-3">{t("trialBonus.credited")}</th>
                   <th className="px-4 py-3">{t("trialBonus.reversed")}</th>
                   <th className="px-4 py-3">{t("trialBonus.remaining")}</th>
@@ -693,7 +688,7 @@ export default function TrialBonus() {
                           <span
                             className={classNames(
                               "rounded-xl px-2 py-1 text-xs",
-                              statusBadgeClass(status)
+                              statusBadgeClass(status),
                             )}
                           >
                             {statusText(status)}
@@ -734,7 +729,7 @@ export default function TrialBonus() {
                               }
                               className={classNames(
                                 primaryButtonClass,
-                                "disabled:opacity-50"
+                                "disabled:opacity-50",
                               )}
                             >
                               {t("trialBonus.grant")}
@@ -751,7 +746,7 @@ export default function TrialBonus() {
                               }
                               className={classNames(
                                 neutralButtonClass,
-                                "disabled:opacity-50"
+                                "disabled:opacity-50",
                               )}
                             >
                               {t("trialBonus.revoke")}
@@ -769,8 +764,7 @@ export default function TrialBonus() {
           <div className={footerBarClass}>
             <div className={`text-xs ${mutedText}`}>
               {t("trialBonus.showing")} {pageInfo.from} {t("trialBonus.to")}{" "}
-              {pageInfo.to} {t("trialBonus.of")} {total}{" "}
-              {t("trialBonus.rows")}
+              {pageInfo.to} {t("trialBonus.of")} {total} {t("trialBonus.rows")}
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -790,6 +784,7 @@ export default function TrialBonus() {
                   <option value={10}>10</option>
                   <option value={20}>20</option>
                   <option value={50}>50</option>
+                  <option value={100}>100</option>
                 </select>
               </div>
 
@@ -799,7 +794,7 @@ export default function TrialBonus() {
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   className={classNames(
                     neutralButtonClass,
-                    "disabled:opacity-50"
+                    "disabled:opacity-50",
                   )}
                 >
                   {t("trialBonus.prev")}
@@ -814,7 +809,7 @@ export default function TrialBonus() {
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   className={classNames(
                     neutralButtonClass,
-                    "disabled:opacity-50"
+                    "disabled:opacity-50",
                   )}
                 >
                   {t("trialBonus.next")}
