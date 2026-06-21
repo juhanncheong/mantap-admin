@@ -1293,7 +1293,7 @@ export default function AdminPopupsPage() {
       <Modal
         open={editorOpen}
         wide
-        isDark={isDark}
+        isDark={true}
         title={modalTitle}
         subtitle={modalSubtitle}
         onClose={closeEditor}
