@@ -19,6 +19,32 @@ function formatDate(value) {
   return d.toLocaleString();
 }
 
+function toDatetimeLocalValue(value) {
+  if (!value) return "";
+
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+
+  const pad = (n) => String(n).padStart(2, "0");
+
+  const yyyy = d.getFullYear();
+  const mm = pad(d.getMonth() + 1);
+  const dd = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const min = pad(d.getMinutes());
+
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
+
+function datetimeLocalToIso(value) {
+  if (!value) return null;
+
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+
+  return d.toISOString();
+}
+
 function Modal({
   open,
   title,
@@ -57,7 +83,7 @@ function Modal({
 
   const cardClass = isDark
     ? "border-white/10 bg-[#0b1220]/95"
-    : "border-[#E7E1D7] bg-white";
+    : "border-[#E5E7EB] bg-white";
 
   const headerClass = isDark
     ? "border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.24),_transparent_42%),linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]"
@@ -78,7 +104,9 @@ function Modal({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center px-4"
       onMouseDown={(e) => {
-        if (cardRef.current && !cardRef.current.contains(e.target)) onClose?.();
+        if (cardRef.current && !cardRef.current.contains(e.target)) {
+          onClose?.();
+        }
       }}
     >
       <div
@@ -138,6 +166,7 @@ function UserPicker({
   search,
   setSearch,
   t,
+  isDark,
   hideSearch = false,
   hideSelected = false,
 }) {
@@ -176,37 +205,50 @@ function UserPicker({
     }
   }
 
+  const boxClass = isDark
+    ? "rounded-2xl border border-white/10 bg-white/[0.03] p-3"
+    : "rounded-2xl border border-[#E5E7EB] bg-white p-3";
+
+  const titleClass = isDark ? "text-white" : "text-gray-900";
+  const mutedClass = isDark ? "text-white/50" : "text-gray-500";
+
+  const inputClass = isDark
+    ? "mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
+    : "mt-2 w-full rounded-xl border border-[#D9DDE5] bg-white px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 outline-none focus:border-[#93C5FD]";
+
+  const emptyClass = isDark
+    ? "rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50"
+    : "rounded-xl border border-dashed border-[#D1D5DB] px-3 py-4 text-xs text-gray-500";
+
   return (
     <div className="space-y-3">
       {!hideSearch ? (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-          <div className="text-xs font-semibold text-white">
+        <div className={boxClass}>
+          <div className={classNames("text-xs font-semibold", titleClass)}>
             {t("popups.searchUsers")}
           </div>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("popups.searchUsersPlaceholder")}
-            className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
+            className={inputClass}
           />
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+      <div className={boxClass}>
         <div className="mb-3 flex items-center justify-between">
-          <div className="text-xs font-semibold text-white">
+          <div className={classNames("text-xs font-semibold", titleClass)}>
             {t("popups.pickUsers")}
           </div>
-          <div className="text-[11px] text-white/50">
+          <div className={classNames("text-[11px]", mutedClass)}>
             {t("popups.selected")}: {selectedUsers.length}
           </div>
         </div>
 
         <div className="grid gap-2">
           {filteredUsers.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50">
-              {t("popups.noUsersFound")}
-            </div>
+            <div className={emptyClass}>{t("popups.noUsersFound")}</div>
           ) : (
             filteredUsers.map((u) => {
               const active = selectedUsers.some(
@@ -221,15 +263,24 @@ function UserPicker({
                   className={classNames(
                     "flex items-center justify-between rounded-2xl border px-3 py-3 text-left transition",
                     active
-                      ? "border-blue-500/35 bg-blue-500/10"
-                      : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
+                      ? isDark
+                        ? "border-blue-500/35 bg-blue-500/10"
+                        : "border-blue-300 bg-blue-50"
+                      : isDark
+                        ? "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+                        : "border-[#E5E7EB] bg-white hover:bg-[#F9FAFB]",
                   )}
                 >
                   <div>
-                    <div className="text-sm font-semibold text-white">
+                    <div
+                      className={classNames(
+                        "text-sm font-semibold",
+                        titleClass,
+                      )}
+                    >
                       UID: {u.uid || "-"}
                     </div>
-                    <div className="mt-1 text-[12px] text-white/55">
+                    <div className={classNames("mt-1 text-[12px]", mutedClass)}>
                       {t("popups.phone")}: {u.phoneNumber || "-"}
                     </div>
                   </div>
@@ -238,8 +289,12 @@ function UserPicker({
                     className={classNames(
                       "rounded-full px-2.5 py-1 text-[10px] font-semibold",
                       active
-                        ? "bg-blue-500/20 text-blue-200"
-                        : "bg-white/5 text-white/60",
+                        ? isDark
+                          ? "bg-blue-500/20 text-blue-200"
+                          : "bg-blue-100 text-blue-700"
+                        : isDark
+                          ? "bg-white/5 text-white/60"
+                          : "bg-gray-100 text-gray-600",
                     )}
                   >
                     {active ? t("popups.selected") : t("popups.select")}
@@ -252,15 +307,19 @@ function UserPicker({
       </div>
 
       {!hideSelected && selectedUsers.length > 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-          <div className="mb-2 text-xs font-semibold text-white">
+        <div className={boxClass}>
+          <div className={classNames("mb-2 text-xs font-semibold", titleClass)}>
             {t("popups.selectedUserIds")}
           </div>
           <div className="flex flex-wrap gap-2">
             {selectedUsers.map((id) => (
               <span
                 key={id}
-                className="rounded-full border border-blue-500/25 bg-blue-500/10 px-3 py-1 text-[11px] text-blue-200"
+                className={
+                  isDark
+                    ? "rounded-full border border-blue-500/25 bg-blue-500/10 px-3 py-1 text-[11px] text-blue-200"
+                    : "rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] text-blue-700"
+                }
               >
                 {id}
               </span>
@@ -295,6 +354,13 @@ export default function AdminPopupsPage() {
   const [editingId, setEditingId] = useState(null);
   const [userLoading, setUserLoading] = useState(false);
 
+  const [sentTimeOpen, setSentTimeOpen] = useState(false);
+  const [sentTimeForm, setSentTimeForm] = useState({
+    id: "",
+    title: "",
+    sentAt: "",
+  });
+
   const [popupForm, setPopupForm] = useState({
     title: "",
     message: "",
@@ -308,6 +374,7 @@ export default function AdminPopupsPage() {
     description: "",
     targetType: "all",
     targetUser: "",
+    sentAt: "",
   });
 
   const [userSearch, setUserSearch] = useState("");
@@ -345,6 +412,38 @@ export default function AdminPopupsPage() {
     : "bg-[#FAFBFC] text-xs text-[#6B7280]";
 
   const rowHoverClass = isDark ? "hover:bg-white/[0.03]" : "hover:bg-[#FAFBFF]";
+
+  const modalBoxClass = isDark
+    ? "rounded-3xl border border-white/10 bg-white/[0.03] p-4"
+    : "rounded-3xl border border-[#E5E7EB] bg-[#FAFBFC] p-4";
+
+  const modalSmallBoxClass = isDark
+    ? "rounded-2xl border border-white/10 bg-white/[0.03] p-3"
+    : "rounded-2xl border border-[#E5E7EB] bg-white p-3";
+
+  const modalTitleText = isDark ? "text-white" : "text-gray-900";
+  const modalMutedText = isDark ? "text-white/55" : "text-gray-500";
+  const modalLabelText = isDark ? "text-white/60" : "text-gray-600";
+
+  const modalInputClass = isDark
+    ? "w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
+    : "w-full rounded-2xl border border-[#D9DDE5] bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:border-[#93C5FD]";
+
+  const modalSmallInputClass = isDark
+    ? "mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
+    : "mt-2 w-full rounded-xl border border-[#D9DDE5] bg-white px-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 outline-none focus:border-[#93C5FD]";
+
+  const modalEmptyClass = isDark
+    ? "rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50"
+    : "rounded-xl border border-dashed border-[#D1D5DB] px-3 py-4 text-xs text-gray-500";
+
+  const modalFooterCancelClass = isDark
+    ? "rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/70 hover:bg-white/10"
+    : "rounded-2xl border border-[#E5E7EB] bg-white px-4 py-2 text-xs text-gray-600 hover:bg-[#F9FAFB]";
+
+  const modalFooterPrimaryClass = isDark
+    ? "rounded-2xl border border-blue-500/25 bg-blue-500/15 px-4 py-2 text-xs font-semibold text-blue-200 hover:bg-blue-500/20 disabled:opacity-50"
+    : "rounded-2xl border border-[#BFDBFE] bg-[#EAF3FF] px-4 py-2 text-xs font-semibold text-[#1D4ED8] hover:bg-[#DDEEFF] disabled:opacity-50";
 
   function getAuthHeaders() {
     const token = localStorage.getItem("admin_token");
@@ -429,6 +528,7 @@ export default function AdminPopupsPage() {
       toast.error(e.message || t("popups.failedLoadPage"));
       setPopups([]);
       setNotifications([]);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -484,6 +584,7 @@ export default function AdminPopupsPage() {
       description: "",
       targetType: "all",
       targetUser: "",
+      sentAt: "",
     });
 
     setUserSearch("");
@@ -528,6 +629,26 @@ export default function AdminPopupsPage() {
     setEditorType("notification");
     setEditorMode("create");
     setEditorOpen(true);
+  }
+
+  function openSentTimeEditor(notification) {
+    setSentTimeForm({
+      id: notification._id,
+      title: notification.title || "",
+      sentAt: toDatetimeLocalValue(
+        notification.sentAt || notification.createdAt,
+      ),
+    });
+    setSentTimeOpen(true);
+  }
+
+  function closeSentTimeEditor() {
+    setSentTimeOpen(false);
+    setSentTimeForm({
+      id: "",
+      title: "",
+      sentAt: "",
+    });
   }
 
   async function savePopup() {
@@ -601,6 +722,7 @@ export default function AdminPopupsPage() {
     const description = String(notificationForm.description || "").trim();
     const targetType = notificationForm.targetType === "user" ? "user" : "all";
     const targetUser = String(notificationForm.targetUser || "").trim();
+    const sentAtIso = datetimeLocalToIso(notificationForm.sentAt);
 
     if (!title) {
       toast.error(t("popups.notificationTitleRequired"));
@@ -617,6 +739,11 @@ export default function AdminPopupsPage() {
       return;
     }
 
+    if (notificationForm.sentAt && !sentAtIso) {
+      toast.error("Invalid sent time");
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -626,6 +753,10 @@ export default function AdminPopupsPage() {
         targetType,
         targetUser: targetType === "user" ? targetUser : null,
       };
+
+      if (sentAtIso) {
+        payload.sentAt = sentAtIso;
+      }
 
       const data = await fetchJSON(`${API_BASE}/api/admin/user-notifications`, {
         method: "POST",
@@ -640,6 +771,48 @@ export default function AdminPopupsPage() {
       await loadPage();
     } catch (e) {
       toast.error(e.message || t("popups.failedCreateNotification"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function saveSentTime() {
+    const notificationId = String(sentTimeForm.id || "").trim();
+    const sentAtIso = datetimeLocalToIso(sentTimeForm.sentAt);
+
+    if (!notificationId) {
+      toast.error("Notification not found");
+      return;
+    }
+
+    if (!sentTimeForm.sentAt || !sentAtIso) {
+      toast.error("Invalid sent time");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/user-notifications/${notificationId}/sent-time`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sentAt: sentAtIso,
+          }),
+        },
+      );
+
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === notificationId ? data.notification : n)),
+      );
+
+      toast.success("Sent time updated");
+      closeSentTimeEditor();
+      await loadPage();
+    } catch (e) {
+      toast.error(e.message || "Failed to update sent time");
     } finally {
       setSaving(false);
     }
@@ -1151,23 +1324,21 @@ export default function AdminPopupsPage() {
             </div>
 
             <div className="popup-table-scroll overflow-x-auto">
-              <table className="min-w-[1300px] text-left text-sm">
+              <table className="min-w-[1450px] text-left text-sm">
                 <thead className={tableHeadClass}>
                   <tr>
-                    <th className="w-[260px] px-5 py-3">{t("popups.title")}</th>
-                    <th className="w-[560px] px-5 py-3">
+                    <th className="w-[240px] px-5 py-3">{t("popups.title")}</th>
+                    <th className="w-[480px] px-5 py-3">
                       {t("popups.description")}
                     </th>
-                    <th className="w-[160px] px-5 py-3">
+                    <th className="w-[150px] px-5 py-3">
                       {t("popups.target")}
                     </th>
                     <th className="w-[130px] px-5 py-3">
                       {t("popups.status")}
                     </th>
-                    <th className="w-[220px] px-5 py-3">
-                      {t("popups.created")}
-                    </th>
-                    <th className="w-[180px] px-5 py-3">
+                    <th className="w-[220px] px-5 py-3">Sent Time</th>
+                    <th className="w-[250px] px-5 py-3">
                       {t("popups.actions")}
                     </th>
                   </tr>
@@ -1205,7 +1376,7 @@ export default function AdminPopupsPage() {
                       return (
                         <tr key={notification._id} className={rowHoverClass}>
                           <td className="px-5 py-4 align-top">
-                            <div className="max-w-[260px]">
+                            <div className="max-w-[240px]">
                               <div
                                 className={`truncate text-sm font-semibold ${strongText}`}
                               >
@@ -1216,7 +1387,7 @@ export default function AdminPopupsPage() {
 
                           <td className="px-5 py-4 align-top">
                             <div
-                              className={`max-w-[560px] whitespace-pre-wrap break-words text-sm leading-7 ${softText}`}
+                              className={`max-w-[480px] whitespace-pre-wrap break-words text-sm leading-7 ${softText}`}
                             >
                               {notification.description || "-"}
                             </div>
@@ -1263,21 +1434,39 @@ export default function AdminPopupsPage() {
                           <td
                             className={`px-5 py-4 align-top text-sm ${softText}`}
                           >
-                            {formatDate(notification.createdAt)}
+                            {formatDate(
+                              notification.sentAt || notification.createdAt,
+                            )}
                           </td>
 
                           <td className="px-5 py-4 align-top">
-                            <button
-                              disabled={isBusy || !notification.isActive}
-                              onClick={() => disableNotification(notification)}
-                              className={
-                                isDark
-                                  ? "rounded-2xl border border-orange-500/25 bg-orange-500/10 px-3 py-2 text-xs text-orange-200 hover:bg-orange-500/15 disabled:opacity-50"
-                                  : "rounded-2xl border border-orange-200 bg-orange-50 px-3 py-2 text-xs text-orange-700 hover:bg-orange-100 disabled:opacity-50"
-                              }
-                            >
-                              {t("popups.disable")}
-                            </button>
+                            <div className="flex items-center gap-2 whitespace-nowrap">
+                              <button
+                                disabled={isBusy}
+                                onClick={() => openSentTimeEditor(notification)}
+                                className={
+                                  isDark
+                                    ? "rounded-2xl border border-blue-500/25 bg-blue-500/10 px-3 py-2 text-xs text-blue-200 hover:bg-blue-500/15 disabled:opacity-50"
+                                    : "rounded-2xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-700 hover:bg-blue-100 disabled:opacity-50"
+                                }
+                              >
+                                Edit Time
+                              </button>
+
+                              <button
+                                disabled={isBusy || !notification.isActive}
+                                onClick={() =>
+                                  disableNotification(notification)
+                                }
+                                className={
+                                  isDark
+                                    ? "rounded-2xl border border-orange-500/25 bg-orange-500/10 px-3 py-2 text-xs text-orange-200 hover:bg-orange-500/15 disabled:opacity-50"
+                                    : "rounded-2xl border border-orange-200 bg-orange-50 px-3 py-2 text-xs text-orange-700 hover:bg-orange-100 disabled:opacity-50"
+                                }
+                              >
+                                {t("popups.disable")}
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1293,23 +1482,20 @@ export default function AdminPopupsPage() {
       <Modal
         open={editorOpen}
         wide
-        isDark={true}
+        isDark={isDark}
         title={modalTitle}
         subtitle={modalSubtitle}
         onClose={closeEditor}
         footer={
           <div className="flex items-center justify-end gap-2">
-            <button
-              onClick={closeEditor}
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/70 hover:bg-white/10"
-            >
+            <button onClick={closeEditor} className={modalFooterCancelClass}>
               {t("popups.cancel")}
             </button>
 
             <button
               disabled={saving}
               onClick={saveEditor}
-              className="rounded-2xl border border-blue-500/25 bg-blue-500/15 px-4 py-2 text-xs font-semibold text-blue-200 hover:bg-blue-500/20 disabled:opacity-50"
+              className={modalFooterPrimaryClass}
             >
               {saving
                 ? editorType === "notification"
@@ -1328,14 +1514,19 @@ export default function AdminPopupsPage() {
       >
         {editorType === "notification" ? (
           <div className="grid gap-4 lg:grid-cols-1">
-            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
-              <div className="mb-3 text-sm font-semibold text-white">
+            <div className={modalBoxClass}>
+              <div
+                className={classNames(
+                  "mb-3 text-sm font-semibold",
+                  modalTitleText,
+                )}
+              >
                 {t("popups.notificationContent")}
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <div className="mb-2 text-xs text-white/60">
+                  <div className={classNames("mb-2 text-xs", modalLabelText)}>
                     {t("popups.title")}
                   </div>
                   <input
@@ -1347,12 +1538,12 @@ export default function AdminPopupsPage() {
                       }))
                     }
                     placeholder={t("popups.notificationTitlePlaceholder")}
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
+                    className={modalInputClass}
                   />
                 </div>
 
                 <div>
-                  <div className="mb-2 text-xs text-white/60">
+                  <div className={classNames("mb-2 text-xs", modalLabelText)}>
                     {t("popups.description")}
                   </div>
                   <textarea
@@ -1365,8 +1556,30 @@ export default function AdminPopupsPage() {
                     }
                     placeholder={t("popups.notificationDescriptionPlaceholder")}
                     rows={8}
-                    className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
+                    className={classNames("resize-none", modalInputClass)}
                   />
+                </div>
+
+                <div>
+                  <div className={classNames("mb-2 text-xs", modalLabelText)}>
+                    Sent Time
+                  </div>
+                  <input
+                    type="datetime-local"
+                    value={notificationForm.sentAt}
+                    onChange={(e) =>
+                      setNotificationForm((p) => ({
+                        ...p,
+                        sentAt: e.target.value,
+                      }))
+                    }
+                    className={modalInputClass}
+                  />
+                  <div
+                    className={classNames("mt-2 text-[11px]", modalMutedText)}
+                  >
+                    Leave empty to use current time.
+                  </div>
                 </div>
               </div>
             </div>
@@ -1391,29 +1604,42 @@ export default function AdminPopupsPage() {
               allDesc={t("popups.sendNotificationEveryone")}
               specificDesc={t("popups.sendNotificationOneUser")}
               t={t}
+              isDark={isDark}
             />
 
             {notificationForm.targetType === "user" ? (
               <div className="grid gap-4 lg:grid-cols-2">
                 <div className="space-y-3">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                    <div className="text-xs font-semibold text-white">
+                  <div className={modalSmallBoxClass}>
+                    <div
+                      className={classNames(
+                        "text-xs font-semibold",
+                        modalTitleText,
+                      )}
+                    >
                       {t("popups.searchUsers")}
                     </div>
                     <input
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}
                       placeholder={t("popups.searchUsersPlaceholder")}
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
+                      className={modalSmallInputClass}
                     />
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                  <div className={modalSmallBoxClass}>
                     <div className="mb-3 flex items-center justify-between">
-                      <div className="text-xs font-semibold text-white">
+                      <div
+                        className={classNames(
+                          "text-xs font-semibold",
+                          modalTitleText,
+                        )}
+                      >
                         {t("popups.pickUser")}
                       </div>
-                      <div className="text-[11px] text-white/50">
+                      <div
+                        className={classNames("text-[11px]", modalMutedText)}
+                      >
                         {notificationForm.targetUser
                           ? `1 ${t("popups.selectedLower")}`
                           : `0 ${t("popups.selectedLower")}`}
@@ -1422,11 +1648,11 @@ export default function AdminPopupsPage() {
 
                     <div className="grid gap-2">
                       {userLoading ? (
-                        <div className="rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50">
+                        <div className={modalEmptyClass}>
                           Searching users...
                         </div>
                       ) : notificationUserResults.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50">
+                        <div className={modalEmptyClass}>
                           {t("popups.noUsersFound")}
                         </div>
                       ) : (
@@ -1448,15 +1674,29 @@ export default function AdminPopupsPage() {
                               className={classNames(
                                 "flex items-center justify-between rounded-2xl border px-3 py-3 text-left transition",
                                 active
-                                  ? "border-blue-500/35 bg-blue-500/10"
-                                  : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
+                                  ? isDark
+                                    ? "border-blue-500/35 bg-blue-500/10"
+                                    : "border-blue-300 bg-blue-50"
+                                  : isDark
+                                    ? "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+                                    : "border-[#E5E7EB] bg-white hover:bg-[#F9FAFB]",
                               )}
                             >
                               <div>
-                                <div className="text-sm font-semibold text-white">
+                                <div
+                                  className={classNames(
+                                    "text-sm font-semibold",
+                                    modalTitleText,
+                                  )}
+                                >
                                   UID: {u.uid || "-"}
                                 </div>
-                                <div className="mt-1 text-[12px] text-white/55">
+                                <div
+                                  className={classNames(
+                                    "mt-1 text-[12px]",
+                                    modalMutedText,
+                                  )}
+                                >
                                   {t("popups.phone")}: {u.phoneNumber || "-"}
                                 </div>
                               </div>
@@ -1465,8 +1705,12 @@ export default function AdminPopupsPage() {
                                 className={classNames(
                                   "rounded-full px-2.5 py-1 text-[10px] font-semibold",
                                   active
-                                    ? "bg-blue-500/20 text-blue-200"
-                                    : "bg-white/5 text-white/60",
+                                    ? isDark
+                                      ? "bg-blue-500/20 text-blue-200"
+                                      : "bg-blue-100 text-blue-700"
+                                    : isDark
+                                      ? "bg-white/5 text-white/60"
+                                      : "bg-gray-100 text-gray-600",
                                 )}
                               >
                                 {active
@@ -1491,6 +1735,7 @@ export default function AdminPopupsPage() {
                     }))
                   }
                   t={t}
+                  isDark={isDark}
                 />
               </div>
             ) : null}
@@ -1503,43 +1748,55 @@ export default function AdminPopupsPage() {
                 t("popups.notificationTip3"),
                 t("popups.notificationTip4"),
               ]}
+              isDark={isDark}
             />
           </div>
         ) : (
           <div className="grid gap-4 lg:grid-cols-1">
             <div className="space-y-4">
-              <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
-                <div className="mb-3 text-sm font-semibold text-white">
+              <div className={modalBoxClass}>
+                <div
+                  className={classNames(
+                    "mb-3 text-sm font-semibold",
+                    modalTitleText,
+                  )}
+                >
                   {t("popups.popupContent")}
                 </div>
 
                 <div className="space-y-3">
                   <div>
-                    <div className="mb-2 text-xs text-white/60">
+                    <div className={classNames("mb-2 text-xs", modalLabelText)}>
                       {t("popups.title")}
                     </div>
                     <input
                       value={popupForm.title}
                       onChange={(e) =>
-                        setPopupForm((p) => ({ ...p, title: e.target.value }))
+                        setPopupForm((p) => ({
+                          ...p,
+                          title: e.target.value,
+                        }))
                       }
                       placeholder={t("popups.popupTitlePlaceholder")}
-                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
+                      className={modalInputClass}
                     />
                   </div>
 
                   <div>
-                    <div className="mb-2 text-xs text-white/60">
+                    <div className={classNames("mb-2 text-xs", modalLabelText)}>
                       {t("popups.message")}
                     </div>
                     <textarea
                       value={popupForm.message}
                       onChange={(e) =>
-                        setPopupForm((p) => ({ ...p, message: e.target.value }))
+                        setPopupForm((p) => ({
+                          ...p,
+                          message: e.target.value,
+                        }))
                       }
                       placeholder={t("popups.popupMessagePlaceholder")}
                       rows={8}
-                      className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
+                      className={classNames("resize-none", modalInputClass)}
                     />
                   </div>
                 </div>
@@ -1555,27 +1812,36 @@ export default function AdminPopupsPage() {
                   }))
                 }
                 setSpecific={() =>
-                  setPopupForm((p) => ({ ...p, targetType: "specific" }))
+                  setPopupForm((p) => ({
+                    ...p,
+                    targetType: "specific",
+                  }))
                 }
                 specificLabel={t("popups.specificUsers")}
                 allTitle={t("popups.allUsers")}
                 allDesc={t("popups.showPopupEveryone")}
                 specificDesc={t("popups.pickPopupSpecific")}
                 t={t}
+                isDark={isDark}
               />
 
               {popupForm.targetType === "specific" ? (
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="space-y-3">
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                      <div className="text-xs font-semibold text-white">
+                    <div className={modalSmallBoxClass}>
+                      <div
+                        className={classNames(
+                          "text-xs font-semibold",
+                          modalTitleText,
+                        )}
+                      >
                         {t("popups.searchUsers")}
                       </div>
                       <input
                         value={userSearch}
                         onChange={(e) => setUserSearch(e.target.value)}
                         placeholder={t("popups.searchUidPhone")}
-                        className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
+                        className={modalSmallInputClass}
                       />
                     </div>
 
@@ -1598,6 +1864,7 @@ export default function AdminPopupsPage() {
                       search={userSearch}
                       setSearch={setUserSearch}
                       t={t}
+                      isDark={isDark}
                       hideSearch
                       hideSelected
                     />
@@ -1615,36 +1882,54 @@ export default function AdminPopupsPage() {
                       }))
                     }
                     t={t}
+                    isDark={isDark}
                   />
                 </div>
               ) : null}
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
-                <div className="mb-3 text-sm font-semibold text-white">
+              <div className={modalBoxClass}>
+                <div
+                  className={classNames(
+                    "mb-3 text-sm font-semibold",
+                    modalTitleText,
+                  )}
+                >
                   {t("popups.status")}
                 </div>
 
                 <button
                   type="button"
                   onClick={() =>
-                    setPopupForm((p) => ({ ...p, isActive: !p.isActive }))
+                    setPopupForm((p) => ({
+                      ...p,
+                      isActive: !p.isActive,
+                    }))
                   }
                   className={classNames(
                     "flex w-full items-center justify-between rounded-2xl border px-4 py-4 text-left transition",
                     popupForm.isActive
-                      ? "border-blue-500/35 bg-blue-500/10"
-                      : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
+                      ? isDark
+                        ? "border-blue-500/35 bg-blue-500/10"
+                        : "border-blue-300 bg-blue-50"
+                      : isDark
+                        ? "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+                        : "border-[#E5E7EB] bg-white hover:bg-[#F9FAFB]",
                   )}
                 >
                   <div>
-                    <div className="text-sm font-semibold text-white">
+                    <div
+                      className={classNames(
+                        "text-sm font-semibold",
+                        modalTitleText,
+                      )}
+                    >
                       {popupForm.isActive
                         ? t("popups.active")
                         : t("popups.inactive")}
                     </div>
-                    <div className="mt-1 text-xs text-white/50">
+                    <div className={classNames("mt-1 text-xs", modalMutedText)}>
                       {popupForm.isActive
                         ? t("popups.usersCanReceive")
                         : t("popups.savedButHidden")}
@@ -1655,8 +1940,12 @@ export default function AdminPopupsPage() {
                     className={classNames(
                       "rounded-full px-2.5 py-1 text-[10px] font-semibold",
                       popupForm.isActive
-                        ? "bg-blue-500/20 text-blue-200"
-                        : "bg-white/10 text-white/60",
+                        ? isDark
+                          ? "bg-blue-500/20 text-blue-200"
+                          : "bg-blue-100 text-blue-700"
+                        : isDark
+                          ? "bg-white/10 text-white/60"
+                          : "bg-gray-100 text-gray-600",
                     )}
                   >
                     {popupForm.isActive ? t("popups.on") : t("popups.off")}
@@ -1672,10 +1961,60 @@ export default function AdminPopupsPage() {
                   t("popups.popupTip3"),
                   t("popups.popupTip4"),
                 ]}
+                isDark={isDark}
               />
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        open={sentTimeOpen}
+        isDark={isDark}
+        title="Edit Sent Time"
+        subtitle={sentTimeForm.title || "Modify notification display time"}
+        onClose={closeSentTimeEditor}
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <button
+              onClick={closeSentTimeEditor}
+              className={modalFooterCancelClass}
+            >
+              Cancel
+            </button>
+
+            <button
+              disabled={saving}
+              onClick={saveSentTime}
+              className={modalFooterPrimaryClass}
+            >
+              {saving ? "Saving..." : "Save Sent Time"}
+            </button>
+          </div>
+        }
+      >
+        <div className={modalBoxClass}>
+          <div className={classNames("mb-2 text-xs", modalLabelText)}>
+            Sent Time
+          </div>
+
+          <input
+            type="datetime-local"
+            value={sentTimeForm.sentAt}
+            onChange={(e) =>
+              setSentTimeForm((p) => ({
+                ...p,
+                sentAt: e.target.value,
+              }))
+            }
+            className={modalInputClass}
+          />
+
+          <div className={classNames("mt-3 text-xs leading-6", modalMutedText)}>
+            This is the time users will see on the notification. It does not
+            change the real database created time.
+          </div>
+        </div>
       </Modal>
     </Shell>
   );
@@ -1690,10 +2029,18 @@ function AudienceSelector({
   allDesc,
   specificDesc,
   t,
+  isDark,
 }) {
+  const boxClass = isDark
+    ? "rounded-3xl border border-white/10 bg-white/[0.03] p-4"
+    : "rounded-3xl border border-[#E5E7EB] bg-[#FAFBFC] p-4";
+
+  const titleClass = isDark ? "text-white" : "text-gray-900";
+  const mutedClass = isDark ? "text-white/50" : "text-gray-500";
+
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
-      <div className="mb-3 text-sm font-semibold text-white">
+    <div className={boxClass}>
+      <div className={classNames("mb-3 text-sm font-semibold", titleClass)}>
         {t("popups.audience")}
       </div>
 
@@ -1704,12 +2051,20 @@ function AudienceSelector({
           className={classNames(
             "rounded-3xl border px-4 py-4 text-left transition",
             mode === "all"
-              ? "border-emerald-500/35 bg-emerald-500/10"
-              : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
+              ? isDark
+                ? "border-emerald-500/35 bg-emerald-500/10"
+                : "border-emerald-300 bg-emerald-50"
+              : isDark
+                ? "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+                : "border-[#E5E7EB] bg-white hover:bg-[#F9FAFB]",
           )}
         >
-          <div className="text-sm font-semibold text-white">{allTitle}</div>
-          <div className="mt-1 text-xs text-white/50">{allDesc}</div>
+          <div className={classNames("text-sm font-semibold", titleClass)}>
+            {allTitle}
+          </div>
+          <div className={classNames("mt-1 text-xs", mutedClass)}>
+            {allDesc}
+          </div>
         </button>
 
         <button
@@ -1718,33 +2073,49 @@ function AudienceSelector({
           className={classNames(
             "rounded-3xl border px-4 py-4 text-left transition",
             mode === "specific" || mode === "user"
-              ? "border-violet-500/35 bg-violet-500/10"
-              : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
+              ? isDark
+                ? "border-violet-500/35 bg-violet-500/10"
+                : "border-violet-300 bg-violet-50"
+              : isDark
+                ? "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+                : "border-[#E5E7EB] bg-white hover:bg-[#F9FAFB]",
           )}
         >
-          <div className="text-sm font-semibold text-white">
+          <div className={classNames("text-sm font-semibold", titleClass)}>
             {specificLabel}
           </div>
-          <div className="mt-1 text-xs text-white/50">{specificDesc}</div>
+          <div className={classNames("mt-1 text-xs", mutedClass)}>
+            {specificDesc}
+          </div>
         </button>
       </div>
     </div>
   );
 }
 
-function SelectedSingleUser({ users, targetUser, clear, t }) {
+function SelectedSingleUser({ users, targetUser, clear, t, isDark }) {
+  const boxClass = isDark
+    ? "rounded-2xl border border-white/10 bg-white/[0.03] p-3"
+    : "rounded-2xl border border-[#E5E7EB] bg-white p-3";
+
+  const titleClass = isDark ? "text-white" : "text-gray-900";
+  const mutedClass = isDark ? "text-white/55" : "text-gray-500";
+  const softClass = isDark ? "text-white/35" : "text-gray-400";
+
+  const emptyClass = isDark
+    ? "rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50"
+    : "rounded-xl border border-dashed border-[#D1D5DB] px-3 py-4 text-xs text-gray-500";
+
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+    <div className={boxClass}>
       <div className="mb-3 flex items-center justify-between">
-        <div className="text-xs font-semibold text-white">
+        <div className={classNames("text-xs font-semibold", titleClass)}>
           {t("popups.selectedUser")}
         </div>
       </div>
 
       {!targetUser ? (
-        <div className="rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50">
-          {t("popups.noUserSelected")}
-        </div>
+        <div className={emptyClass}>{t("popups.noUserSelected")}</div>
       ) : (
         (() => {
           const picked = users.find(
@@ -1752,15 +2123,23 @@ function SelectedSingleUser({ users, targetUser, clear, t }) {
           );
 
           return (
-            <div className="flex items-center justify-between rounded-2xl border border-blue-500/25 bg-blue-500/10 px-3 py-3">
+            <div
+              className={
+                isDark
+                  ? "flex items-center justify-between rounded-2xl border border-blue-500/25 bg-blue-500/10 px-3 py-3"
+                  : "flex items-center justify-between rounded-2xl border border-blue-200 bg-blue-50 px-3 py-3"
+              }
+            >
               <div>
-                <div className="text-sm font-semibold text-white">
+                <div
+                  className={classNames("text-sm font-semibold", titleClass)}
+                >
                   UID: {picked?.uid || "-"}
                 </div>
-                <div className="mt-1 text-[12px] text-white/55">
+                <div className={classNames("mt-1 text-[12px]", mutedClass)}>
                   {t("popups.phone")}: {picked?.phoneNumber || "-"}
                 </div>
-                <div className="mt-1 text-[11px] text-white/35">
+                <div className={classNames("mt-1 text-[11px]", softClass)}>
                   ID: {targetUser}
                 </div>
               </div>
@@ -1768,7 +2147,11 @@ function SelectedSingleUser({ users, targetUser, clear, t }) {
               <button
                 type="button"
                 onClick={clear}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:bg-white/10"
+                className={
+                  isDark
+                    ? "rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:bg-white/10"
+                    : "rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[11px] text-gray-600 hover:bg-gray-50"
+                }
               >
                 {t("popups.remove")}
               </button>
@@ -1780,22 +2163,31 @@ function SelectedSingleUser({ users, targetUser, clear, t }) {
   );
 }
 
-function SelectedMultipleUsers({ users, selectedUsers, remove, t }) {
+function SelectedMultipleUsers({ users, selectedUsers, remove, t, isDark }) {
+  const boxClass = isDark
+    ? "rounded-2xl border border-white/10 bg-white/[0.03] p-3"
+    : "rounded-2xl border border-[#E5E7EB] bg-white p-3";
+
+  const titleClass = isDark ? "text-white" : "text-gray-900";
+  const mutedClass = isDark ? "text-white/50" : "text-gray-500";
+
+  const emptyClass = isDark
+    ? "rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50"
+    : "rounded-xl border border-dashed border-[#D1D5DB] px-3 py-4 text-xs text-gray-500";
+
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+    <div className={boxClass}>
       <div className="mb-3 flex items-center justify-between">
-        <div className="text-xs font-semibold text-white">
+        <div className={classNames("text-xs font-semibold", titleClass)}>
           {t("popups.selectedUsers")}
         </div>
-        <div className="text-[11px] text-white/50">
+        <div className={classNames("text-[11px]", mutedClass)}>
           {t("popups.total")}: {selectedUsers.length}
         </div>
       </div>
 
       {selectedUsers.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50">
-          {t("popups.noUsersSelected")}
-        </div>
+        <div className={emptyClass}>{t("popups.noUsersSelected")}</div>
       ) : (
         <div className="grid gap-2">
           {selectedUsers.map((id) => {
@@ -1804,13 +2196,19 @@ function SelectedMultipleUsers({ users, selectedUsers, remove, t }) {
             return (
               <div
                 key={id}
-                className="flex items-center justify-between rounded-2xl border border-blue-500/25 bg-blue-500/10 px-3 py-3"
+                className={
+                  isDark
+                    ? "flex items-center justify-between rounded-2xl border border-blue-500/25 bg-blue-500/10 px-3 py-3"
+                    : "flex items-center justify-between rounded-2xl border border-blue-200 bg-blue-50 px-3 py-3"
+                }
               >
                 <div>
-                  <div className="text-sm font-semibold text-white">
+                  <div
+                    className={classNames("text-sm font-semibold", titleClass)}
+                  >
                     UID: {picked?.uid || "-"}
                   </div>
-                  <div className="mt-1 text-[12px] text-white/55">
+                  <div className={classNames("mt-1 text-[12px]", mutedClass)}>
                     {t("popups.phone")}: {picked?.phoneNumber || "-"}
                   </div>
                 </div>
@@ -1818,7 +2216,11 @@ function SelectedMultipleUsers({ users, selectedUsers, remove, t }) {
                 <button
                   type="button"
                   onClick={() => remove(id)}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:bg-white/10"
+                  className={
+                    isDark
+                      ? "rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:bg-white/10"
+                      : "rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[11px] text-gray-600 hover:bg-gray-50"
+                  }
                 >
                   {t("popups.remove")}
                 </button>
@@ -1831,11 +2233,20 @@ function SelectedMultipleUsers({ users, selectedUsers, remove, t }) {
   );
 }
 
-function QuickTips({ title, tips }) {
+function QuickTips({ title, tips, isDark }) {
+  const boxClass = isDark
+    ? "rounded-3xl border border-white/10 bg-white/[0.03] p-4"
+    : "rounded-3xl border border-[#E5E7EB] bg-[#FAFBFC] p-4";
+
+  const titleClass = isDark ? "text-white" : "text-gray-900";
+  const textClass = isDark ? "text-white/55" : "text-gray-500";
+
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
-      <div className="mb-2 text-sm font-semibold text-white">{title}</div>
-      <ul className="space-y-2 text-xs leading-6 text-white/55">
+    <div className={boxClass}>
+      <div className={classNames("mb-2 text-sm font-semibold", titleClass)}>
+        {title}
+      </div>
+      <ul className={classNames("space-y-2 text-xs leading-6", textClass)}>
         {tips.map((tip) => (
           <li key={tip}>• {tip}</li>
         ))}
