@@ -19,7 +19,16 @@ function formatDate(value) {
   return d.toLocaleString();
 }
 
-function Modal({ open, title, subtitle, children, onClose, footer, wide = false }) {
+function Modal({
+  open,
+  title,
+  subtitle,
+  children,
+  onClose,
+  footer,
+  wide = false,
+  isDark = false,
+}) {
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -46,6 +55,25 @@ function Modal({ open, title, subtitle, children, onClose, footer, wide = false 
 
   if (!open) return null;
 
+  const cardClass = isDark
+    ? "border-white/10 bg-[#0b1220]/95"
+    : "border-[#E7E1D7] bg-white";
+
+  const headerClass = isDark
+    ? "border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.24),_transparent_42%),linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]"
+    : "border-[#EEF2F7] bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_42%),linear-gradient(135deg,#ffffff,#F8FAFC)]";
+
+  const titleClass = isDark ? "text-white" : "text-gray-950";
+  const subtitleClass = isDark ? "text-white/50" : "text-gray-500";
+
+  const closeClass = isDark
+    ? "rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-xs text-white/70 hover:bg-white/10"
+    : "rounded-xl border border-[#E5E7EB] bg-white px-2.5 py-2 text-xs text-gray-600 hover:bg-[#F9FAFB]";
+
+  const footerClass = isDark
+    ? "border-t border-white/10 bg-white/[0.03] px-5 py-4"
+    : "border-t border-[#EEF2F7] bg-[#FAFBFC] px-5 py-4";
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center px-4"
@@ -53,29 +81,43 @@ function Modal({ open, title, subtitle, children, onClose, footer, wide = false 
         if (cardRef.current && !cardRef.current.contains(e.target)) onClose?.();
       }}
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className={classNames(
+          "absolute inset-0 backdrop-blur-sm",
+          isDark ? "bg-black/60" : "bg-gray-900/25",
+        )}
+      />
 
       <div
         ref={cardRef}
         className={classNames(
           "relative w-full overflow-hidden rounded-[28px] border shadow-2xl",
           wide ? "max-w-4xl" : "max-w-xl",
-          "border-white/10 bg-[#0b1220]/95"
+          cardClass,
         )}
       >
-        <div className="relative overflow-hidden border-b border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.24),_transparent_42%),linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] px-5 py-4">
+        <div
+          className={classNames(
+            "relative overflow-hidden border-b px-5 py-4",
+            headerClass,
+          )}
+        >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-base font-semibold text-white">{title}</div>
+              <div
+                className={classNames("text-base font-semibold", titleClass)}
+              >
+                {title}
+              </div>
+
               {subtitle ? (
-                <div className="mt-1 text-xs text-white/50">{subtitle}</div>
+                <div className={classNames("mt-1 text-xs", subtitleClass)}>
+                  {subtitle}
+                </div>
               ) : null}
             </div>
 
-            <button
-              onClick={onClose}
-              className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-xs text-white/70 hover:bg-white/10"
-            >
+            <button onClick={onClose} className={closeClass}>
               ✕
             </button>
           </div>
@@ -83,11 +125,7 @@ function Modal({ open, title, subtitle, children, onClose, footer, wide = false 
 
         <div className="max-h-[75vh] overflow-y-auto px-5 py-5">{children}</div>
 
-        {footer ? (
-          <div className="border-t border-white/10 bg-white/[0.03] px-5 py-4">
-            {footer}
-          </div>
-        ) : null}
+        {footer ? <div className={footerClass}>{footer}</div> : null}
       </div>
     </div>
   );
@@ -104,15 +142,23 @@ function UserPicker({
   hideSelected = false,
 }) {
   const filteredUsers = useMemo(() => {
-    const q = String(search || "").trim().toLowerCase();
+    const q = String(search || "")
+      .trim()
+      .toLowerCase();
     if (!q) return allUsers.slice(0, 20);
 
     return allUsers
       .filter((u) => {
         return (
-          String(u.phoneNumber || "").toLowerCase().includes(q) ||
-          String(u.uid || "").toLowerCase().includes(q) ||
-          String(u._id || "").toLowerCase().includes(q)
+          String(u.phoneNumber || "")
+            .toLowerCase()
+            .includes(q) ||
+          String(u.uid || "")
+            .toLowerCase()
+            .includes(q) ||
+          String(u._id || "")
+            .toLowerCase()
+            .includes(q)
         );
       })
       .slice(0, 30);
@@ -123,7 +169,7 @@ function UserPicker({
 
     if (exists) {
       setSelectedUsers((prev) =>
-        prev.filter((id) => String(id) !== String(user._id))
+        prev.filter((id) => String(id) !== String(user._id)),
       );
     } else {
       setSelectedUsers((prev) => [...prev, String(user._id)]);
@@ -164,7 +210,7 @@ function UserPicker({
           ) : (
             filteredUsers.map((u) => {
               const active = selectedUsers.some(
-                (id) => String(id) === String(u._id)
+                (id) => String(id) === String(u._id),
               );
 
               return (
@@ -176,7 +222,7 @@ function UserPicker({
                     "flex items-center justify-between rounded-2xl border px-3 py-3 text-left transition",
                     active
                       ? "border-blue-500/35 bg-blue-500/10"
-                      : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+                      : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
                   )}
                 >
                   <div>
@@ -193,7 +239,7 @@ function UserPicker({
                       "rounded-full px-2.5 py-1 text-[10px] font-semibold",
                       active
                         ? "bg-blue-500/20 text-blue-200"
-                        : "bg-white/5 text-white/60"
+                        : "bg-white/5 text-white/60",
                     )}
                   >
                     {active ? t("popups.selected") : t("popups.select")}
@@ -247,6 +293,7 @@ export default function AdminPopupsPage() {
   const [editorType, setEditorType] = useState("popup");
   const [editorMode, setEditorMode] = useState("create");
   const [editingId, setEditingId] = useState(null);
+  const [userLoading, setUserLoading] = useState(false);
 
   const [popupForm, setPopupForm] = useState({
     title: "",
@@ -325,10 +372,40 @@ export default function AdminPopupsPage() {
     }
 
     if (!res.ok) {
-      throw new Error(data?.message || `${t("popups.requestFailed")} (${res.status})`);
+      throw new Error(
+        data?.message || `${t("popups.requestFailed")} (${res.status})`,
+      );
     }
 
     return data;
+  }
+
+  async function loadUsers(searchText = "") {
+    setUserLoading(true);
+
+    try {
+      const params = new URLSearchParams({
+        page: "1",
+        limit: "30",
+        sortBy: "createdAt_desc",
+      });
+
+      const cleanSearch = String(searchText || "").trim();
+      if (cleanSearch) {
+        params.set("q", cleanSearch);
+      }
+
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users?${params.toString()}`,
+      );
+
+      setUsers(Array.isArray(data.users) ? data.users : []);
+    } catch (e) {
+      toast.error(e.message || t("popups.failedLoadPage"));
+      setUsers([]);
+    } finally {
+      setUserLoading(false);
+    }
   }
 
   async function loadPage() {
@@ -338,14 +415,14 @@ export default function AdminPopupsPage() {
       const [popupData, notificationData, userData] = await Promise.all([
         fetchJSON(`${API_BASE}/api/admin/popups`),
         fetchJSON(`${API_BASE}/api/admin/user-notifications`),
-        fetchJSON(`${API_BASE}/api/admin/users`),
+        fetchJSON(`${API_BASE}/api/admin/users?limit=100`),
       ]);
 
       setPopups(Array.isArray(popupData.popups) ? popupData.popups : []);
       setNotifications(
         Array.isArray(notificationData.notifications)
           ? notificationData.notifications
-          : []
+          : [],
       );
       setUsers(Array.isArray(userData.users) ? userData.users : []);
     } catch (e) {
@@ -361,6 +438,31 @@ export default function AdminPopupsPage() {
     loadPage();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!editorOpen) return;
+
+    const needsUserSearch =
+      (editorType === "notification" &&
+        notificationForm.targetType === "user") ||
+      (editorType === "popup" && popupForm.targetType === "specific");
+
+    if (!needsUserSearch) return;
+
+    const timer = setTimeout(() => {
+      loadUsers(userSearch);
+    }, 250);
+
+    return () => clearTimeout(timer);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    editorOpen,
+    editorType,
+    userSearch,
+    notificationForm.targetType,
+    popupForm.targetType,
+  ]);
 
   function resetPopupForm() {
     setPopupForm({
@@ -469,14 +571,17 @@ export default function AdminPopupsPage() {
         setPopups((prev) => [data.popup, ...prev]);
         toast.success(t("popups.popupCreated"));
       } else {
-        const data = await fetchJSON(`${API_BASE}/api/admin/popups/${editingId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const data = await fetchJSON(
+          `${API_BASE}/api/admin/popups/${editingId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          },
+        );
 
         setPopups((prev) =>
-          prev.map((p) => (p._id === editingId ? data.popup : p))
+          prev.map((p) => (p._id === editingId ? data.popup : p)),
         );
 
         toast.success(t("popups.popupUpdated"));
@@ -553,20 +658,23 @@ export default function AdminPopupsPage() {
     setBusyId(popup._id);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/popups/${popup._id}/active`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isActive: !popup.isActive }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/popups/${popup._id}/active`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isActive: !popup.isActive }),
+        },
+      );
 
       setPopups((prev) =>
-        prev.map((p) => (p._id === popup._id ? data.popup : p))
+        prev.map((p) => (p._id === popup._id ? data.popup : p)),
       );
 
       toast.success(
         data.popup?.isActive
           ? t("popups.popupActivated")
-          : t("popups.popupDeactivated")
+          : t("popups.popupDeactivated"),
       );
     } catch (e) {
       toast.error(e.message || t("popups.failedUpdatePopup"));
@@ -576,7 +684,9 @@ export default function AdminPopupsPage() {
   }
 
   async function deletePopup(popup) {
-    const ok = window.confirm(t("popups.confirmDeletePopup", { title: popup.title }));
+    const ok = window.confirm(
+      t("popups.confirmDeletePopup", { title: popup.title }),
+    );
     if (!ok) return;
 
     setBusyId(popup._id);
@@ -597,7 +707,7 @@ export default function AdminPopupsPage() {
 
   async function disableNotification(notification) {
     const ok = window.confirm(
-      t("popups.confirmDisableNotification", { title: notification.title })
+      t("popups.confirmDisableNotification", { title: notification.title }),
     );
     if (!ok) return;
 
@@ -608,11 +718,11 @@ export default function AdminPopupsPage() {
         `${API_BASE}/api/admin/user-notifications/${notification._id}/disable`,
         {
           method: "PATCH",
-        }
+        },
       );
 
       setNotifications((prev) =>
-        prev.map((n) => (n._id === notification._id ? data.notification : n))
+        prev.map((n) => (n._id === notification._id ? data.notification : n)),
       );
 
       toast.success(t("popups.notificationDisabled"));
@@ -624,48 +734,52 @@ export default function AdminPopupsPage() {
   }
 
   const filteredPopups = useMemo(() => {
-    const qq = String(q || "").trim().toLowerCase();
+    const qq = String(q || "")
+      .trim()
+      .toLowerCase();
 
     return popups.filter((p) => {
       if (!qq) return true;
 
       return (
-        String(p.title || "").toLowerCase().includes(qq) ||
-        String(p.message || "").toLowerCase().includes(qq) ||
-        String(p.targetType || "").toLowerCase().includes(qq)
+        String(p.title || "")
+          .toLowerCase()
+          .includes(qq) ||
+        String(p.message || "")
+          .toLowerCase()
+          .includes(qq) ||
+        String(p.targetType || "")
+          .toLowerCase()
+          .includes(qq)
       );
     });
   }, [popups, q]);
 
   const filteredNotifications = useMemo(() => {
-    const qq = String(q || "").trim().toLowerCase();
+    const qq = String(q || "")
+      .trim()
+      .toLowerCase();
 
     return notifications.filter((n) => {
       if (!qq) return true;
 
       return (
-        String(n.title || "").toLowerCase().includes(qq) ||
-        String(n.description || "").toLowerCase().includes(qq) ||
-        String(n.targetType || "").toLowerCase().includes(qq)
+        String(n.title || "")
+          .toLowerCase()
+          .includes(qq) ||
+        String(n.description || "")
+          .toLowerCase()
+          .includes(qq) ||
+        String(n.targetType || "")
+          .toLowerCase()
+          .includes(qq)
       );
     });
   }, [notifications, q]);
 
   const notificationUserResults = useMemo(() => {
-    const qq = String(userSearch || "").trim().toLowerCase();
-
-    if (!qq) return users.slice(0, 20);
-
-    return users
-      .filter((u) => {
-        return (
-          String(u.phoneNumber || "").toLowerCase().includes(qq) ||
-          String(u.uid || "").toLowerCase().includes(qq) ||
-          String(u._id || "").toLowerCase().includes(qq)
-        );
-      })
-      .slice(0, 30);
-  }, [users, userSearch]);
+    return users.slice(0, 30);
+  }, [users]);
 
   const activeTitle =
     activeTab === "notification"
@@ -686,15 +800,15 @@ export default function AdminPopupsPage() {
     editorType === "notification"
       ? t("popups.createNotification")
       : editorMode === "create"
-      ? t("popups.createPopup")
-      : t("popups.editPopup");
+        ? t("popups.createPopup")
+        : t("popups.editPopup");
 
   const modalSubtitle =
     editorType === "notification"
       ? t("popups.createNotificationSubtitle")
       : editorMode === "create"
-      ? t("popups.createPopupSubtitle")
-      : t("popups.editingPopup", { id: editingId || "" });
+        ? t("popups.createPopupSubtitle")
+        : t("popups.editingPopup", { id: editingId || "" });
 
   return (
     <Shell title={activeTitle}>
@@ -708,7 +822,9 @@ export default function AdminPopupsPage() {
                 {t("popups.communicationCenter")}
               </div>
 
-              <h2 className={`mt-3 text-2xl font-semibold tracking-tight ${strongText}`}>
+              <h2
+                className={`mt-3 text-2xl font-semibold tracking-tight ${strongText}`}
+              >
                 {activeTitle}
               </h2>
 
@@ -721,7 +837,7 @@ export default function AdminPopupsPage() {
                   "mt-5 inline-flex rounded-2xl border p-1",
                   isDark
                     ? "border-white/10 bg-white/[0.03]"
-                    : "border-[#E5E7EB] bg-[#F9FAFB]"
+                    : "border-[#E5E7EB] bg-[#F9FAFB]",
                 )}
               >
                 <button
@@ -737,8 +853,8 @@ export default function AdminPopupsPage() {
                         ? "bg-blue-500/20 text-blue-200"
                         : "bg-white text-[#1D4ED8] shadow-sm"
                       : isDark
-                      ? "text-white/55 hover:text-white"
-                      : "text-gray-500 hover:text-gray-900"
+                        ? "text-white/55 hover:text-white"
+                        : "text-gray-500 hover:text-gray-900",
                   )}
                 >
                   {t("popups.popup")}
@@ -757,8 +873,8 @@ export default function AdminPopupsPage() {
                         ? "bg-blue-500/20 text-blue-200"
                         : "bg-white text-[#1D4ED8] shadow-sm"
                       : isDark
-                      ? "text-white/55 hover:text-white"
-                      : "text-gray-500 hover:text-gray-900"
+                        ? "text-white/55 hover:text-white"
+                        : "text-gray-500 hover:text-gray-900",
                   )}
                 >
                   {t("popups.notification")}
@@ -805,7 +921,9 @@ export default function AdminPopupsPage() {
             <div
               className={classNames(
                 "flex items-center justify-between px-5 py-4",
-                isDark ? "border-b border-white/10" : "border-b border-[#EEF2F7]"
+                isDark
+                  ? "border-b border-white/10"
+                  : "border-b border-[#EEF2F7]",
               )}
             >
               <div className={`text-sm font-semibold ${strongText}`}>
@@ -821,12 +939,22 @@ export default function AdminPopupsPage() {
                 <thead className={tableHeadClass}>
                   <tr>
                     <th className="w-[240px] px-5 py-3">{t("popups.title")}</th>
-                    <th className="w-[520px] px-5 py-3">{t("popups.message")}</th>
-                    <th className="w-[140px] px-5 py-3">{t("popups.target")}</th>
+                    <th className="w-[520px] px-5 py-3">
+                      {t("popups.message")}
+                    </th>
+                    <th className="w-[140px] px-5 py-3">
+                      {t("popups.target")}
+                    </th>
                     <th className="w-[180px] px-5 py-3">{t("popups.users")}</th>
-                    <th className="w-[130px] px-5 py-3">{t("popups.status")}</th>
-                    <th className="w-[220px] px-5 py-3">{t("popups.created")}</th>
-                    <th className="w-[220px] px-5 py-3">{t("popups.actions")}</th>
+                    <th className="w-[130px] px-5 py-3">
+                      {t("popups.status")}
+                    </th>
+                    <th className="w-[220px] px-5 py-3">
+                      {t("popups.created")}
+                    </th>
+                    <th className="w-[220px] px-5 py-3">
+                      {t("popups.actions")}
+                    </th>
                   </tr>
                 </thead>
 
@@ -839,13 +967,19 @@ export default function AdminPopupsPage() {
                 >
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className={`px-5 py-6 text-sm ${softText}`}>
+                      <td
+                        colSpan={7}
+                        className={`px-5 py-6 text-sm ${softText}`}
+                      >
                         {t("popups.loadingPopups")}
                       </td>
                     </tr>
                   ) : filteredPopups.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className={`px-5 py-6 text-sm ${softText}`}>
+                      <td
+                        colSpan={7}
+                        className={`px-5 py-6 text-sm ${softText}`}
+                      >
                         {t("popups.noPopupsFound")}
                       </td>
                     </tr>
@@ -885,8 +1019,8 @@ export default function AdminPopupsPage() {
                                     ? "bg-violet-500/15 text-violet-200"
                                     : "border border-violet-200 bg-violet-50 text-violet-700"
                                   : isDark
-                                  ? "bg-emerald-500/15 text-emerald-200"
-                                  : "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                                    ? "bg-emerald-500/15 text-emerald-200"
+                                    : "border border-emerald-200 bg-emerald-50 text-emerald-700",
                               )}
                             >
                               {popup.targetType === "specific"
@@ -899,9 +1033,12 @@ export default function AdminPopupsPage() {
                             {popup.targetType === "specific" ? (
                               <div className="max-w-[240px]">
                                 <div className={`text-sm ${strongText}`}>
-                                  {targetUsers.length} {t("popups.selectedLower")}
+                                  {targetUsers.length}{" "}
+                                  {t("popups.selectedLower")}
                                 </div>
-                                <div className={`mt-1 text-[11px] ${mutedText}`}>
+                                <div
+                                  className={`mt-1 text-[11px] ${mutedText}`}
+                                >
                                   {targetUsers
                                     .slice(0, 2)
                                     .map((u) => `UID: ${u?.uid || "-"}`)
@@ -925,15 +1062,19 @@ export default function AdminPopupsPage() {
                                     ? "bg-blue-500/15 text-blue-200"
                                     : "border border-blue-200 bg-blue-50 text-blue-700"
                                   : isDark
-                                  ? "bg-white/10 text-white/60"
-                                  : "border border-gray-200 bg-gray-50 text-gray-600"
+                                    ? "bg-white/10 text-white/60"
+                                    : "border border-gray-200 bg-gray-50 text-gray-600",
                               )}
                             >
-                              {popup.isActive ? t("popups.active") : t("popups.inactive")}
+                              {popup.isActive
+                                ? t("popups.active")
+                                : t("popups.inactive")}
                             </span>
                           </td>
 
-                          <td className={`px-5 py-4 align-top text-sm ${softText}`}>
+                          <td
+                            className={`px-5 py-4 align-top text-sm ${softText}`}
+                          >
                             {formatDate(popup.createdAt)}
                           </td>
 
@@ -961,11 +1102,13 @@ export default function AdminPopupsPage() {
                                       ? "border-orange-500/25 bg-orange-500/10 text-orange-200 hover:bg-orange-500/15"
                                       : "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100"
                                     : isDark
-                                    ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15"
-                                    : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                      ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15"
+                                      : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
                                 )}
                               >
-                                {popup.isActive ? t("popups.deactivate") : t("popups.activate")}
+                                {popup.isActive
+                                  ? t("popups.deactivate")
+                                  : t("popups.activate")}
                               </button>
 
                               <button
@@ -994,7 +1137,9 @@ export default function AdminPopupsPage() {
             <div
               className={classNames(
                 "flex items-center justify-between px-5 py-4",
-                isDark ? "border-b border-white/10" : "border-b border-[#EEF2F7]"
+                isDark
+                  ? "border-b border-white/10"
+                  : "border-b border-[#EEF2F7]",
               )}
             >
               <div className={`text-sm font-semibold ${strongText}`}>
@@ -1013,10 +1158,18 @@ export default function AdminPopupsPage() {
                     <th className="w-[560px] px-5 py-3">
                       {t("popups.description")}
                     </th>
-                    <th className="w-[160px] px-5 py-3">{t("popups.target")}</th>
-                    <th className="w-[130px] px-5 py-3">{t("popups.status")}</th>
-                    <th className="w-[220px] px-5 py-3">{t("popups.created")}</th>
-                    <th className="w-[180px] px-5 py-3">{t("popups.actions")}</th>
+                    <th className="w-[160px] px-5 py-3">
+                      {t("popups.target")}
+                    </th>
+                    <th className="w-[130px] px-5 py-3">
+                      {t("popups.status")}
+                    </th>
+                    <th className="w-[220px] px-5 py-3">
+                      {t("popups.created")}
+                    </th>
+                    <th className="w-[180px] px-5 py-3">
+                      {t("popups.actions")}
+                    </th>
                   </tr>
                 </thead>
 
@@ -1029,13 +1182,19 @@ export default function AdminPopupsPage() {
                 >
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className={`px-5 py-6 text-sm ${softText}`}>
+                      <td
+                        colSpan={6}
+                        className={`px-5 py-6 text-sm ${softText}`}
+                      >
                         {t("popups.loadingNotifications")}
                       </td>
                     </tr>
                   ) : filteredNotifications.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className={`px-5 py-6 text-sm ${softText}`}>
+                      <td
+                        colSpan={6}
+                        className={`px-5 py-6 text-sm ${softText}`}
+                      >
                         {t("popups.noNotificationsFound")}
                       </td>
                     </tr>
@@ -1072,8 +1231,8 @@ export default function AdminPopupsPage() {
                                     ? "bg-violet-500/15 text-violet-200"
                                     : "border border-violet-200 bg-violet-50 text-violet-700"
                                   : isDark
-                                  ? "bg-emerald-500/15 text-emerald-200"
-                                  : "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                                    ? "bg-emerald-500/15 text-emerald-200"
+                                    : "border border-emerald-200 bg-emerald-50 text-emerald-700",
                               )}
                             >
                               {notification.targetType === "user"
@@ -1091,15 +1250,19 @@ export default function AdminPopupsPage() {
                                     ? "bg-blue-500/15 text-blue-200"
                                     : "border border-blue-200 bg-blue-50 text-blue-700"
                                   : isDark
-                                  ? "bg-white/10 text-white/60"
-                                  : "border border-gray-200 bg-gray-50 text-gray-600"
+                                    ? "bg-white/10 text-white/60"
+                                    : "border border-gray-200 bg-gray-50 text-gray-600",
                               )}
                             >
-                              {notification.isActive ? t("popups.active") : t("popups.disabled")}
+                              {notification.isActive
+                                ? t("popups.active")
+                                : t("popups.disabled")}
                             </span>
                           </td>
 
-                          <td className={`px-5 py-4 align-top text-sm ${softText}`}>
+                          <td
+                            className={`px-5 py-4 align-top text-sm ${softText}`}
+                          >
                             {formatDate(notification.createdAt)}
                           </td>
 
@@ -1130,6 +1293,7 @@ export default function AdminPopupsPage() {
       <Modal
         open={editorOpen}
         wide
+        isDark={isDark}
         title={modalTitle}
         subtitle={modalSubtitle}
         onClose={closeEditor}
@@ -1151,13 +1315,13 @@ export default function AdminPopupsPage() {
                 ? editorType === "notification"
                   ? t("popups.creating")
                   : editorMode === "create"
-                  ? t("popups.creating")
-                  : t("popups.saving")
+                    ? t("popups.creating")
+                    : t("popups.saving")
                 : editorType === "notification"
-                ? t("popups.createNotification")
-                : editorMode === "create"
-                ? t("popups.createPopup")
-                : t("popups.saveChanges")}
+                  ? t("popups.createNotification")
+                  : editorMode === "create"
+                    ? t("popups.createPopup")
+                    : t("popups.saveChanges")}
             </button>
           </div>
         }
@@ -1257,14 +1421,19 @@ export default function AdminPopupsPage() {
                     </div>
 
                     <div className="grid gap-2">
-                      {notificationUserResults.length === 0 ? (
+                      {userLoading ? (
+                        <div className="rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50">
+                          Searching users...
+                        </div>
+                      ) : notificationUserResults.length === 0 ? (
                         <div className="rounded-xl border border-dashed border-white/10 px-3 py-4 text-xs text-white/50">
                           {t("popups.noUsersFound")}
                         </div>
                       ) : (
                         notificationUserResults.map((u) => {
                           const active =
-                            String(notificationForm.targetUser) === String(u._id);
+                            String(notificationForm.targetUser) ===
+                            String(u._id);
 
                           return (
                             <button
@@ -1280,7 +1449,7 @@ export default function AdminPopupsPage() {
                                 "flex items-center justify-between rounded-2xl border px-3 py-3 text-left transition",
                                 active
                                   ? "border-blue-500/35 bg-blue-500/10"
-                                  : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+                                  : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
                               )}
                             >
                               <div>
@@ -1297,10 +1466,12 @@ export default function AdminPopupsPage() {
                                   "rounded-full px-2.5 py-1 text-[10px] font-semibold",
                                   active
                                     ? "bg-blue-500/20 text-blue-200"
-                                    : "bg-white/5 text-white/60"
+                                    : "bg-white/5 text-white/60",
                                 )}
                               >
-                                {active ? t("popups.selected") : t("popups.select")}
+                                {active
+                                  ? t("popups.selected")
+                                  : t("popups.select")}
                               </div>
                             </button>
                           );
@@ -1439,7 +1610,7 @@ export default function AdminPopupsPage() {
                       setPopupForm((p) => ({
                         ...p,
                         targetUsers: p.targetUsers.filter(
-                          (x) => String(x) !== String(id)
+                          (x) => String(x) !== String(id),
                         ),
                       }))
                     }
@@ -1464,12 +1635,14 @@ export default function AdminPopupsPage() {
                     "flex w-full items-center justify-between rounded-2xl border px-4 py-4 text-left transition",
                     popupForm.isActive
                       ? "border-blue-500/35 bg-blue-500/10"
-                      : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+                      : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
                   )}
                 >
                   <div>
                     <div className="text-sm font-semibold text-white">
-                      {popupForm.isActive ? t("popups.active") : t("popups.inactive")}
+                      {popupForm.isActive
+                        ? t("popups.active")
+                        : t("popups.inactive")}
                     </div>
                     <div className="mt-1 text-xs text-white/50">
                       {popupForm.isActive
@@ -1483,7 +1656,7 @@ export default function AdminPopupsPage() {
                       "rounded-full px-2.5 py-1 text-[10px] font-semibold",
                       popupForm.isActive
                         ? "bg-blue-500/20 text-blue-200"
-                        : "bg-white/10 text-white/60"
+                        : "bg-white/10 text-white/60",
                     )}
                   >
                     {popupForm.isActive ? t("popups.on") : t("popups.off")}
@@ -1532,7 +1705,7 @@ function AudienceSelector({
             "rounded-3xl border px-4 py-4 text-left transition",
             mode === "all"
               ? "border-emerald-500/35 bg-emerald-500/10"
-              : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+              : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
           )}
         >
           <div className="text-sm font-semibold text-white">{allTitle}</div>
@@ -1546,10 +1719,12 @@ function AudienceSelector({
             "rounded-3xl border px-4 py-4 text-left transition",
             mode === "specific" || mode === "user"
               ? "border-violet-500/35 bg-violet-500/10"
-              : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+              : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
           )}
         >
-          <div className="text-sm font-semibold text-white">{specificLabel}</div>
+          <div className="text-sm font-semibold text-white">
+            {specificLabel}
+          </div>
           <div className="mt-1 text-xs text-white/50">{specificDesc}</div>
         </button>
       </div>
@@ -1572,7 +1747,9 @@ function SelectedSingleUser({ users, targetUser, clear, t }) {
         </div>
       ) : (
         (() => {
-          const picked = users.find((u) => String(u._id) === String(targetUser));
+          const picked = users.find(
+            (u) => String(u._id) === String(targetUser),
+          );
 
           return (
             <div className="flex items-center justify-between rounded-2xl border border-blue-500/25 bg-blue-500/10 px-3 py-3">
